@@ -747,12 +747,30 @@
      * STATE MANAJEMEN APLIKASI
      * ========================================================================
      */
-    // Ganti URL default ini dengan URL Web App Apps Script Anda, atau atur via Modal Pengaturan (icon gear / pill status)
+    // Ganti URL default ini dengan URL Web App Apps Script Anda, atau buka link dengan parameter ?gas=URL_ANDA
     const DEFAULT_GAS_URL = ""; 
     const STORAGE_KEY_GAS_URL = "si_notulen_gas_web_app_url";
     const STORAGE_KEY_LOCAL_DB = "si_notulen_local_demo_db";
 
-    let gasWebAppUrl = localStorage.getItem(STORAGE_KEY_GAS_URL) || DEFAULT_GAS_URL;
+    // 1. Cek injeksi URL otomatis jika dijalankan langsung di Google Apps Script (HtmlService)
+    const injectedUrl = "<?= typeof gasWebAppUrl !== 'undefined' ? gasWebAppUrl : '' ?>";
+    if (injectedUrl && injectedUrl.startsWith("http")) {
+      localStorage.setItem(STORAGE_KEY_GAS_URL, injectedUrl);
+    }
+
+    // 2. Auto-deteksi URL dari parameter query browser (?gas=... atau ?api=... atau ?url=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryGasUrl = urlParams.get("gas") || urlParams.get("api") || urlParams.get("url");
+    if (queryGasUrl && queryGasUrl.trim() !== "") {
+      localStorage.setItem(STORAGE_KEY_GAS_URL, queryGasUrl.trim());
+      // Bersihkan query string dari address bar agar URL tetap rapi
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.replaceState({ path: cleanUrl }, "", cleanUrl);
+    }
+
+    let gasWebAppUrl = (injectedUrl && injectedUrl.startsWith("http")) 
+      ? injectedUrl 
+      : (localStorage.getItem(STORAGE_KEY_GAS_URL) || DEFAULT_GAS_URL);
     let meetingsList = [];
 
     // State MediaRecorder (Perekam Audio)

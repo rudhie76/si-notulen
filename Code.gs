@@ -139,23 +139,41 @@ function getOrCreateSystemResources() {
  */
 function doGet(e) {
   try {
-    const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "read";
+    const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : null;
 
-    if (action === "ping") {
+    // 1. Jika dibuka langsung di browser tanpa parameter API, tampilkan UI web jika file 'index' ada di project Apps Script
+    if (!action) {
+      try {
+        const template = HtmlService.createTemplateFromFile("index");
+        template.gasWebAppUrl = ScriptApp.getService().getUrl();
+        return template.evaluate()
+          .setTitle("Sistem Notulen & Berita Acara Rapat Digital")
+          .addMetaTag("viewport", "width=device-width, initial-scale=1.0")
+          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      } catch (errHtml) {
+        // Jika file index.html tidak ada di project GAS, default ke action=read
+      }
+    }
+
+    const effectiveAction = action || "read";
+
+    if (effectiveAction === "ping") {
       return createJsonResponse({
         status: "success",
         message: "API Sistem Notulen Rapat aktif dan terhubung.",
+        webAppUrl: ScriptApp.getService().getUrl(),
         timestamp: new Date().toISOString()
       });
     }
 
-    if (action === "read") {
+    if (effectiveAction === "read") {
       const resources = getOrCreateSystemResources();
       const sheet = resources.sheet;
       const data = getAllMeetings(sheet);
 
       return createJsonResponse({
         status: "success",
+        webAppUrl: ScriptApp.getService().getUrl(),
         data: data,
         total: data.length
       });
@@ -163,7 +181,7 @@ function doGet(e) {
 
     return createJsonResponse({
       status: "error",
-      message: "Action GET '" + action + "' tidak dikenali."
+      message: "Action GET '" + effectiveAction + "' tidak dikenali."
     });
 
   } catch (error) {
