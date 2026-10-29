@@ -16,6 +16,16 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- Library Parser Surat Undangan: PDF.js, Tesseract.js (OCR), dan Mammoth.js (DOCX) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -286,6 +296,61 @@
               <p class="text-xs text-slate-500 mt-0.5">Identitas formal pelaksanaan rapat dinas/organisasi</p>
             </div>
             <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Langkah 1 dari 4</span>
+          </div>
+
+          <!-- Modul Ekstraksi Surat Undangan Otomatis (Auto-Fill) -->
+          <div class="bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-slate-50 border border-blue-200/90 rounded-xl p-4 sm:p-5 shadow-sm space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-start sm:items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-navy-800 text-blue-200 flex items-center justify-center text-lg shadow-sm flex-shrink-0">
+                  <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <h4 class="text-sm font-bold text-navy-950">Isi Otomatis dari Surat Undangan Rapat</h4>
+                    <span class="text-[10px] bg-blue-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-sm">AI / OCR Auto-Fill</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-0.5">Unggah surat undangan (PDF, Foto Scan, Word), data rapat akan <strong>otomatis terisi</strong> ke formulir dan berkas otomatis tersimpan di folder Google Drive <strong>"Surat_Undangan"</strong></p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2 self-start sm:self-auto flex-shrink-0">
+                <button type="button" onclick="document.getElementById('input-undangan-file').click()" class="px-4 py-2 bg-navy-800 hover:bg-navy-900 text-white rounded-lg text-xs font-bold shadow transition flex items-center space-x-1.5 cursor-pointer">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <span>Unggah Undangan</span>
+                </button>
+                <input type="file" id="input-undangan-file" class="hidden" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt" onchange="handleUndanganSelected(event)">
+              </div>
+            </div>
+
+            <!-- Loading Ekstraksi Teks -->
+            <div id="undangan-processing-state" class="hidden py-3 px-4 bg-white/90 border border-blue-300 rounded-lg flex items-center space-x-3 text-xs text-navy-900 shadow-sm animate-pulse">
+              <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+              <span id="undangan-processing-msg" class="font-semibold">Menganalisis dan mengekstrak informasi dari surat undangan...</span>
+            </div>
+
+            <!-- Card Berkas Undangan Terpilih & Terisi -->
+            <div id="undangan-detected-card" class="hidden bg-white border border-emerald-300 rounded-xl p-3 sm:p-4 flex items-center justify-between shadow-sm">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg flex-shrink-0">
+                  <i class="fa-solid fa-file-circle-check"></i>
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <p id="undangan-filename" class="text-xs sm:text-sm font-bold text-slate-900 truncate max-w-xs sm:max-w-md">Surat_Undangan.pdf</p>
+                    <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300">Data Terisi Otomatis</span>
+                  </div>
+                  <p id="undangan-filesize" class="text-[11px] text-slate-500 mt-0.5">Tersimpan di Google Drive: <strong>Surat_Undangan/</strong></p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button type="button" onclick="document.getElementById('input-undangan-file').click()" class="text-xs text-blue-700 hover:text-blue-900 font-semibold px-2.5 py-1 rounded hover:bg-blue-50 transition" title="Ganti Berkas Undangan">
+                  <i class="fa-solid fa-arrows-rotate mr-1"></i> Ganti
+                </button>
+                <button type="button" onclick="clearUndanganFile()" class="text-slate-400 hover:text-red-600 p-1.5" title="Hapus Berkas Undangan">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
@@ -627,7 +692,8 @@
 
           <!-- Berkas Lampiran Info -->
           <div id="doc-lampiran-info" class="mb-6 text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-200">
-            <strong>Catatan Lampiran Digital:</strong>
+            <strong>Catatan Arsip Digital:</strong>
+            <span id="doc-undangan-text">Surat undangan resmi tersimpan di Drive.</span> | 
             <span id="doc-audio-text">Rekaman suara tersedia di Drive.</span> | 
             <span id="doc-berkas-text">Berkas fisik diarsipkan di Drive.</span>
           </div>
@@ -792,6 +858,11 @@
     // State Lampiran Dokumen
     let selectedFile = null;
     let selectedFileBase64 = null;
+
+    // State Surat Undangan (Auto-Fill & Drive Storage)
+    let selectedUndanganFile = null;
+    let selectedUndanganBase64 = null;
+    let lastExtractedUndanganText = "";
 
     // State Web Speech API (Dikte)
     let activeRecognition = null;
@@ -1114,6 +1185,318 @@
     }
 
     // ========================================================================
+    // MODUL EKSTRAKSI SURAT UNDANGAN OTOMATIS (AI / OCR & PARSER)
+    // ========================================================================
+    async function handleUndanganSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      selectedUndanganFile = file;
+
+      // Konversi ke Base64 untuk persiapan upload ke Google Drive (folder Surat_Undangan)
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        selectedUndanganBase64 = reader.result;
+      };
+
+      const procBox = document.getElementById("undangan-processing-state");
+      const procMsg = document.getElementById("undangan-processing-msg");
+      const cardBox = document.getElementById("undangan-detected-card");
+
+      procBox.classList.remove("hidden");
+      cardBox.classList.add("hidden");
+
+      try {
+        let extractedText = "";
+
+        // 1. Berkas PDF
+        if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+          procMsg.innerText = "Membaca teks dari berkas PDF surat undangan...";
+          extractedText = await extractTextFromPdf(file);
+        }
+        // 2. Berkas Foto / Scan Gambar (JPG / PNG)
+        else if (file.type.startsWith("image/") || /\.(jpg|jpeg|png)$/i.test(file.name)) {
+          procMsg.innerText = "Melakukan OCR pemindaian teks dari foto surat undangan...";
+          extractedText = await extractTextFromImage(file);
+        }
+        // 3. Berkas Word (.docx)
+        else if (file.name.toLowerCase().endsWith(".docx") && typeof mammoth !== "undefined") {
+          procMsg.innerText = "Membaca teks dari dokumen Word surat undangan...";
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+          extractedText = result.value || "";
+        }
+        // 4. File teks polos (.txt)
+        else {
+          extractedText = await file.text();
+        }
+
+        lastExtractedUndanganText = extractedText;
+
+        if (!extractedText || extractedText.trim().length === 0) {
+          showToast("Teks dari berkas undangan tidak dapat terbaca otomatis. Anda tetap dapat melengkapi data secara manual.", "info");
+        } else {
+          // Parse data surat undangan dan masukkan ke kolom formulir
+          const parsed = parseIndonesianMeetingInvitation(extractedText);
+          applyParsedDataToForm(parsed);
+          showToast("Data pelaksanaan rapat berhasil diekstrak otomatis dari surat undangan!", "success");
+        }
+
+        // Tampilkan Card Berkas Terdeteksi
+        document.getElementById("undangan-filename").innerText = file.name;
+        document.getElementById("undangan-filesize").innerText = `Ukuran: ${(file.size / 1024).toFixed(1)} KB | Siap diarsipkan ke folder Google Drive: Surat_Undangan/`;
+        cardBox.classList.remove("hidden");
+
+      } catch (err) {
+        console.error("Gagal mengekstrak teks undangan:", err);
+        showToast("Gagal memproses berkas surat: " + err.message, "error");
+      } finally {
+        procBox.classList.add("hidden");
+      }
+    }
+
+    async function extractTextFromPdf(file) {
+      if (typeof pdfjsLib === "undefined") {
+        throw new Error("Library PDF.js belum termuat sempurna.");
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageStrings = textContent.items.map(item => item.str);
+        fullText += pageStrings.join(" ") + "\n";
+      }
+
+      return fullText;
+    }
+
+    async function extractTextFromImage(file) {
+      if (typeof Tesseract === "undefined") {
+        throw new Error("Library OCR Tesseract belum termuat.");
+      }
+      const result = await Tesseract.recognize(file, "ind+eng", {
+        logger: m => {
+          if (m.status === "recognizing text" && m.progress) {
+            const pct = Math.round(m.progress * 100);
+            const msgEl = document.getElementById("undangan-processing-msg");
+            if (msgEl) msgEl.innerText = `Memindai teks foto/scan (OCR ${pct}%)...`;
+          }
+        }
+      });
+      return result && result.data ? result.data.text : "";
+    }
+
+    function parseIndonesianMeetingInvitation(rawText) {
+      const text = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+      const result = {
+        judul: "",
+        tanggalIso: "",
+        tempat: "",
+        pimpinan: "",
+        peserta: "",
+        agenda: ""
+      };
+
+      // 1. Judul / Hal / Perihal
+      const halMatch = text.match(/(?:Hal|Perihal)\s*[:=]\s*([^\n\r]+)/i);
+      if (halMatch && halMatch[1]) {
+        result.judul = halMatch[1].trim();
+      } else {
+        const judulAlt = text.match(/(?:Undangan|Rapat|Sosialisasi|Musyawarah|Koordinasi)\s+[^\n\r]+/i);
+        if (judulAlt) {
+          result.judul = judulAlt[0].trim();
+        }
+      }
+
+      // 2. Hari & Tanggal
+      const tglMatch = text.match(/(?:Hari\s*[\/,]\s*Tanggal|Tanggal|Hari)\s*[:=]\s*([^\n\r]+)/i);
+      let strTanggal = tglMatch ? tglMatch[1].trim() : "";
+
+      // 3. Waktu / Jam / Pukul
+      const waktuMatch = text.match(/(?:Waktu|Pukul|Jam)\s*[:=]\s*([^\n\r]+)/i);
+      let strWaktu = waktuMatch ? waktuMatch[1].trim() : "";
+
+      // Konversi tanggal & waktu menjadi format input datetime-local (YYYY-MM-DDTHH:MM)
+      const parsedDate = parseIndonesianDateTime(strTanggal, strWaktu);
+      if (parsedDate) {
+        result.tanggalIso = parsedDate;
+      }
+
+      // 4. Tempat / Lokasi Pertemuan
+      const tempatMatch = text.match(/(?:Tempat|Lokasi)\s*[:=]\s*([^\n\r]+)/i);
+      if (tempatMatch && tempatMatch[1]) {
+        result.tempat = tempatMatch[1].trim();
+      }
+
+      // 5. Acara / Agenda Rapat
+      const acaraMatch = text.match(/(?:Acara|Agenda)\s*[:=]\s*([^\n\r]+(?:\n\s*[-0-9•*][^\n\r]+)*)/i);
+      if (acaraMatch && acaraMatch[1]) {
+        result.agenda = acaraMatch[1].trim();
+      } else if (result.judul) {
+        result.agenda = result.judul;
+      }
+
+      // 6. Daftar Peserta / Kepada Yth
+      const pesertaMatch = text.match(/Kepada\s*Yth\.?\s*[:=]?([\s\S]*?)(?=di\s*[-–—]?\s*(?:Tempat|tempat)|Dengan\s*hormat|Sehubungan)/i);
+      if (pesertaMatch && pesertaMatch[1]) {
+        result.peserta = pesertaMatch[1].trim()
+          .split("\n")
+          .map(l => l.trim())
+          .filter(l => l.length > 0 && !/^di\s/i.test(l))
+          .join("\n");
+      }
+
+      // 7. Pimpinan Rapat / Pengundang (Jabatan Struktural & Penandatangan)
+      const pimpinanMatch = text.match(/(?:Pimpinan\s*Rapat)\s*[:=]\s*([^\n\r]+)/i);
+      if (pimpinanMatch && pimpinanMatch[1]) {
+        result.pimpinan = pimpinanMatch[1].trim();
+      } else {
+        let bottomSection = text;
+        const demikianIdx = text.search(/Demikian/i);
+        if (demikianIdx !== -1) {
+          bottomSection = text.substring(demikianIdx);
+        } else {
+          const lines = text.split("\n");
+          bottomSection = lines.slice(-12).join("\n");
+        }
+
+        const jabatanMatch = bottomSection.match(/(?:CAMAT|KEPALA\s+DESA|LURAH|SEKRETARIS\s+DAERAH|SEKRETARIS|DIREKTUR|KETUA|BUPATI|WALI\s*KOTA)\s+[^\n\r]+/i);
+        if (jabatanMatch) {
+          const title = jabatanMatch[0].trim();
+          const afterTitle = bottomSection.substring(bottomSection.indexOf(title) + title.length);
+          const nameMatch = afterTitle.match(/\n\s*([A-Z][A-Za-z.,\s]{3,45})(?:\n|\r|$)/);
+          if (nameMatch && nameMatch[1] && !/NIP|Pembina|Golongan|Pangkat/i.test(nameMatch[1])) {
+            result.pimpinan = `${title} - ${nameMatch[1].trim()}`;
+          } else {
+            result.pimpinan = title;
+          }
+        }
+      }
+
+      return result;
+    }
+
+    function parseIndonesianDateTime(tglStr, waktuStr) {
+      try {
+        const bulanMap = {
+          januari: "01", jan: "01",
+          februari: "02", feb: "02",
+          maret: "03", mar: "03",
+          april: "04", apr: "04",
+          mei: "05",
+          juni: "06", jun: "06",
+          juli: "07", jul: "07",
+          agustus: "08", agu: "08", ags: "08",
+          september: "09", sep: "09",
+          oktober: "10", okt: "10",
+          november: "11", nov: "11",
+          desember: "12", des: "12"
+        };
+
+        let day = "";
+        let month = "";
+        let year = "";
+
+        const numericMatch = tglStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+        if (numericMatch) {
+          day = String(numericMatch[1]).padStart(2, "0");
+          month = String(numericMatch[2]).padStart(2, "0");
+          year = numericMatch[3];
+        } else {
+          const textDateMatch = tglStr.match(/(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})/);
+          if (textDateMatch) {
+            day = String(textDateMatch[1]).padStart(2, "0");
+            const bName = textDateMatch[2].toLowerCase();
+            month = bulanMap[bName] || "01";
+            year = textDateMatch[3];
+          }
+        }
+
+        if (!year) {
+          const now = new Date();
+          year = String(now.getFullYear());
+          month = String(now.getMonth() + 1).padStart(2, "0");
+          day = String(now.getDate()).padStart(2, "0");
+        }
+
+        let hour = "09";
+        let minute = "00";
+        const timeMatch = waktuStr.match(/(\d{1,2})[:.](\d{2})/);
+        if (timeMatch) {
+          hour = String(timeMatch[1]).padStart(2, "0");
+          minute = String(timeMatch[2]).padStart(2, "0");
+        }
+
+        return `${year}-${month}-${day}T${hour}:${minute}`;
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function applyParsedDataToForm(parsed) {
+      if (parsed.judul) {
+        const el = document.getElementById("input-judul");
+        el.value = parsed.judul;
+        highlightField(el);
+      }
+      if (parsed.tanggalIso) {
+        const el = document.getElementById("input-tanggal");
+        el.value = parsed.tanggalIso;
+        highlightField(el);
+      }
+      if (parsed.tempat) {
+        const el = document.getElementById("input-tempat");
+        el.value = parsed.tempat;
+        highlightField(el);
+      }
+      if (parsed.pimpinan) {
+        const el = document.getElementById("input-pimpinan");
+        el.value = parsed.pimpinan;
+        highlightField(el);
+      }
+      if (parsed.peserta) {
+        const el = document.getElementById("input-peserta");
+        el.value = parsed.peserta;
+        highlightField(el);
+      }
+      if (parsed.agenda) {
+        const el = document.getElementById("input-agenda");
+        el.value = parsed.agenda;
+        highlightField(el);
+      }
+    }
+
+    function highlightField(el) {
+      el.classList.add("bg-emerald-50", "border-emerald-400", "ring-2", "ring-emerald-200");
+      setTimeout(() => {
+        el.classList.remove("bg-emerald-50", "border-emerald-400", "ring-2", "ring-emerald-200");
+      }, 2500);
+    }
+
+    function reparseUndangan() {
+      if (!lastExtractedUndanganText) {
+        showToast("Belum ada teks undangan yang diekstrak. Unggah berkas kembali.", "info");
+        return;
+      }
+      const parsed = parseIndonesianMeetingInvitation(lastExtractedUndanganText);
+      applyParsedDataToForm(parsed);
+      showToast("Formulir telah diisi ulang sesuai isi surat undangan.", "success");
+    }
+
+    function clearUndanganFile() {
+      selectedUndanganFile = null;
+      selectedUndanganBase64 = null;
+      lastExtractedUndanganText = "";
+      document.getElementById("input-undangan-file").value = "";
+      document.getElementById("undangan-detected-card").classList.add("hidden");
+      document.getElementById("undangan-processing-state").classList.add("hidden");
+    }
+
+    // ========================================================================
     // MODUL UNGGAH LAMPIRAN DOKUMEN / FOTO
     // ========================================================================
     function handleFileSelected(event) {
@@ -1179,6 +1562,27 @@
 
         let urlAudio = "";
         let urlLampiran = "";
+        let urlUndangan = "";
+
+        // 0. Unggah Berkas Undangan jika ada (disimpan ke folder Google Drive: Surat_Undangan)
+        if (selectedUndanganBase64 && selectedUndanganFile) {
+          btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah Berkas Undangan ke Drive...</span>';
+          const undFileName = `Undangan_${sanitizeFilename(selectedUndanganFile.name)}`;
+
+          if (gasWebAppUrl) {
+            const uploadUndRes = await callGasApi({
+              action: "upload_undangan",
+              base64Data: selectedUndanganBase64,
+              fileName: undFileName,
+              mimeType: selectedUndanganFile.type || "application/pdf"
+            });
+            if (uploadUndRes && uploadUndRes.fileUrl) {
+              urlUndangan = uploadUndRes.fileUrl;
+            }
+          } else {
+            urlUndangan = "mock://drive.google.com/undangan-demo.pdf";
+          }
+        }
 
         // 1. Unggah Audio jika ada
         if (audioBase64) {
@@ -1234,6 +1638,7 @@
           tindakLanjut: tindakLanjut || "-",
           urlAudio: urlAudio,
           urlLampiran: urlLampiran,
+          urlUndangan: urlUndangan,
           tempat: tempat
         };
 
@@ -1280,6 +1685,7 @@
       document.getElementById("form-notulen").reset();
       resetAudioRecording();
       clearSelectedFile();
+      clearUndanganFile();
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById("input-tanggal").value = now.toISOString().slice(0, 16);
@@ -1386,6 +1792,7 @@
       data.forEach((meeting) => {
         const hasAudio = meeting.urlAudio && meeting.urlAudio.trim() !== "";
         const hasLampiran = meeting.urlLampiran && meeting.urlLampiran.trim() !== "";
+        const hasUndangan = meeting.urlUndangan && meeting.urlUndangan.trim() !== "";
 
         const card = document.createElement("div");
         card.className = "bg-white rounded-xl border border-slate-200/90 hover:border-navy-400 p-5 shadow-sm hover:shadow-md transition-all duration-200 space-y-3.5";
@@ -1406,6 +1813,12 @@
             </div>
             
             <div class="flex items-center space-x-2 self-start sm:self-auto">
+              ${hasUndangan ? `
+                <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200" title="Ada surat undangan tersimpan di Drive">
+                  <i class="fa-solid fa-envelope-open-text text-[10px]"></i>
+                  <span>Undangan</span>
+                </span>
+              ` : ''}
               ${hasAudio ? `
                 <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Ada rekaman audio">
                   <i class="fa-solid fa-microphone-lines text-[10px]"></i>
@@ -1437,7 +1850,14 @@
 
           <!-- Bottom Action Buttons -->
           <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-            <div class="flex items-center space-x-1.5">
+            <div class="flex items-center space-x-1.5 flex-wrap gap-y-1.5">
+              ${hasUndangan ? `
+                <a href="${meeting.urlUndangan}" target="_blank" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-semibold flex items-center space-x-1.5 border border-indigo-200 transition">
+                  <i class="fa-solid fa-envelope-open-text text-[10px] text-indigo-600"></i>
+                  <span>Surat Undangan</span>
+                </a>
+              ` : ''}
+
               ${hasAudio ? `
                 <button onclick="playDriveAudio('${meeting.urlAudio}', '${escapeHtml(meeting.judulRapat)}')" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center space-x-1.5 border border-emerald-200 transition">
                   <i class="fa-solid fa-circle-play text-xs text-emerald-600"></i>
@@ -1518,7 +1938,7 @@
       const audioCount = data.filter(d => d.urlAudio && d.urlAudio.trim() !== "").length;
       document.getElementById("stat-rekaman-audio").innerText = audioCount;
 
-      const lampiranCount = data.filter(d => d.urlLampiran && d.urlLampiran.trim() !== "").length;
+      const lampiranCount = data.filter(d => (d.urlLampiran && d.urlLampiran.trim() !== "") || (d.urlUndangan && d.urlUndangan.trim() !== "")).length;
       document.getElementById("stat-lampiran-berkas").innerText = lampiranCount;
     }
 
@@ -1571,7 +1991,12 @@
       // Info lampiran digital
       const hasAudio = meeting.urlAudio && meeting.urlAudio.trim() !== "";
       const hasDoc = meeting.urlLampiran && meeting.urlLampiran.trim() !== "";
+      const hasUndangan = meeting.urlUndangan && meeting.urlUndangan.trim() !== "";
 
+      const docUndanganEl = document.getElementById("doc-undangan-text");
+      if (docUndanganEl) {
+        docUndanganEl.innerText = hasUndangan ? "Surat undangan resmi tersimpan di Drive (folder Surat_Undangan)." : "Tidak ada berkas undangan.";
+      }
       document.getElementById("doc-audio-text").innerText = hasAudio ? "Tautan rekaman suara tersimpan di Google Drive." : "Tidak ada rekaman audio.";
       document.getElementById("doc-berkas-text").innerText = hasDoc ? "Berkas lampiran fisik/foto tersimpan di Google Drive." : "Tidak ada lampiran berkas.";
 

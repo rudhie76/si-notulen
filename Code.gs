@@ -15,11 +15,12 @@
 // ==========================================
 // KONSTANTA SISTEM
 // ==========================================
-const ROOT_FOLDER_NAME    = "Sistem_Notulen_Rapat";
-const AUDIO_FOLDER_NAME   = "Rekaman_Audio";
-const DOKUMEN_FOLDER_NAME = "Lampiran_Dokumen";
-const DB_SHEET_NAME       = "DB_Notulen_Rapat";
-const SHEET_TAB_NAME      = "Data_Rapat";
+const ROOT_FOLDER_NAME     = "Sistem_Notulen_Rapat";
+const AUDIO_FOLDER_NAME    = "Rekaman_Audio";
+const DOKUMEN_FOLDER_NAME  = "Lampiran_Dokumen";
+const UNDANGAN_FOLDER_NAME = "Surat_Undangan";
+const DB_SHEET_NAME        = "DB_Notulen_Rapat";
+const SHEET_TAB_NAME       = "Data_Rapat";
 
 // Header Kolom Database
 const TABLE_HEADERS = [
@@ -34,7 +35,8 @@ const TABLE_HEADERS = [
   "Tindak_Lanjut",
   "URL_Audio",
   "URL_Lampiran",
-  "Waktu_Dibuat"
+  "Waktu_Dibuat",
+  "URL_Undangan"
 ];
 
 /**
@@ -72,7 +74,16 @@ function getOrCreateSystemResources() {
     dokumenFolder = rootFolder.createFolder(DOKUMEN_FOLDER_NAME);
   }
 
-  // 3. Cek atau buat Spreadsheet Database di dalam rootFolder
+  // 3. Cek atau buat subfolder Surat_Undangan
+  let undanganFolder;
+  const undanganFolders = rootFolder.getFoldersByName(UNDANGAN_FOLDER_NAME);
+  if (undanganFolders.hasNext()) {
+    undanganFolder = undanganFolders.next();
+  } else {
+    undanganFolder = rootFolder.createFolder(UNDANGAN_FOLDER_NAME);
+  }
+
+  // 4. Cek atau buat Spreadsheet Database di dalam rootFolder
   let spreadsheet;
   const sheetFiles = rootFolder.getFilesByName(DB_SHEET_NAME);
   
@@ -89,7 +100,7 @@ function getOrCreateSystemResources() {
     spreadsheet = newSS;
   }
 
-  // 4. Cek atau buat sheet "Data_Rapat" dan inisialisasi header kolom
+  // 5. Cek atau buat sheet "Data_Rapat" dan inisialisasi header kolom
   let sheet = spreadsheet.getSheetByName(SHEET_TAB_NAME);
   if (!sheet) {
     // Ambil sheet pertama bawaan atau buat sheet baru
@@ -120,12 +131,28 @@ function getOrCreateSystemResources() {
     for (let c = 1; c <= TABLE_HEADERS.length; c++) {
       sheet.setColumnWidth(c, 160);
     }
+  } else {
+    // Jika sheet sudah ada tapi kolom ke-13 (URL_Undangan) belum ada, tambahkan secara otomatis
+    if (sheet.getLastColumn() < TABLE_HEADERS.length) {
+      for (let c = sheet.getLastColumn() + 1; c <= TABLE_HEADERS.length; c++) {
+        const headerName = TABLE_HEADERS[c - 1];
+        const cell = sheet.getRange(1, c);
+        cell.setValue(headerName);
+        cell.setFontWeight("bold");
+        cell.setBackground("#1E3A8A");
+        cell.setFontColor("#FFFFFF");
+        cell.setHorizontalAlignment("center");
+        cell.setVerticalAlignment("middle");
+        sheet.setColumnWidth(c, 160);
+      }
+    }
   }
 
   return {
     rootFolder: rootFolder,
     audioFolder: audioFolder,
     dokumenFolder: dokumenFolder,
+    undanganFolder: undanganFolder,
     spreadsheet: spreadsheet,
     sheet: sheet
   };
@@ -264,7 +291,26 @@ function doPost(e) {
       });
     }
 
-    // 4. ACTION: BUAT NOTULEN BARU (CREATE)
+    // 4. ACTION: UNGGAH BERKAS SURAT UNDANGAN
+    if (action === "upload_undangan") {
+      if (!payload.base64Data) {
+        throw new Error("Parameter base64Data surat undangan tidak ditemukan.");
+      }
+
+      const fileName = payload.fileName || ("Surat_Undangan_" + formatTimestampForFilename(new Date()) + ".pdf");
+      const mimeType = payload.mimeType || "application/pdf";
+
+      const fileUrl = saveBase64File(resources.undanganFolder, payload.base64Data, fileName, mimeType);
+
+      return createJsonResponse({
+        status: "success",
+        message: "Surat undangan berhasil disimpan ke Google Drive (folder Surat_Undangan).",
+        fileUrl: fileUrl,
+        fileName: fileName
+      });
+    }
+
+    // 5. ACTION: BUAT NOTULEN BARU (CREATE)
     if (action === "create") {
       const meetingData = payload.data;
       if (!meetingData) {
@@ -287,7 +333,8 @@ function doPost(e) {
         meetingData.tindakLanjut || "-",
         meetingData.urlAudio || "",
         meetingData.urlLampiran || "",
-        nowIso
+        nowIso,
+        meetingData.urlUndangan || ""
       ];
 
       resources.sheet.appendRow(newRow);
@@ -308,7 +355,8 @@ function doPost(e) {
           tindakLanjut: newRow[8],
           urlAudio: newRow[9],
           urlLampiran: newRow[10],
-          waktuDibuat: newRow[11]
+          waktuDibuat: newRow[11],
+          urlUndangan: newRow[12]
         }
       });
     }
@@ -398,7 +446,8 @@ function getAllMeetings(sheet) {
       tindakLanjut: row[8],
       urlAudio: row[9],
       urlLampiran: row[10],
-      waktuDibuat: row[11]
+      waktuDibuat: row[11],
+      urlUndangan: row[12] || ""
     });
   }
 

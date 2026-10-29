@@ -10,20 +10,25 @@ Aplikasi web modern untuk manajemen notulensi dan berita acara rapat dinas/organ
 1. **Auto-Provisioning Google Drive & Sheets**:
    - Backend langsung mendeteksi dan secara otomatis membuat:
      - Folder Induk: `Sistem_Notulen_Rapat`
-     - Subfolder: `Rekaman_Audio`
-     - Subfolder: `Lampiran_Dokumen`
+     - Subfolder: `Surat_Undangan` *(Arsip surat undangan PDF/Foto/Docx)*
+     - Subfolder: `Rekaman_Audio` *(Arsip rekaman suara rapat)*
+     - Subfolder: `Lampiran_Dokumen` *(Daftar hadir bertanda tangan & foto dokumentasi)*
      - Spreadsheet Database: `DB_Notulen_Rapat` dengan lembar `Data_Rapat` beserta baris *header* yang terformat rapi dan terkunci (*freeze row*).
-2. **Perekam Suara Rapat Terintegrasi (MediaRecorder API)**:
+2. **Ekstraksi Otomatis Berkas Undangan (AI / OCR Auto-Fill)**:
+   - Pengguna dapat mengunggah berkas surat undangan rapat resmi (format PDF, foto/scan JPG/PNG, maupun Word).
+   - Sistem secara cerdas membaca dan mengekstrak: **Judul/Perihal Rapat, Hari & Tanggal, Jam/Waktu, Tempat Pelaksanaan, Pimpinan Rapat, Daftar Peserta, dan Agenda Pembahasan**.
+   - Kolom formulir akan otomatis terisi secara instan, dan berkas fisik undangan otomatis diarsipkan ke subfolder Google Drive `Surat_Undangan`.
+3. **Perekam Suara Rapat Terintegrasi (MediaRecorder API)**:
    - Tombol kontrol: Mulai Rekam, Jeda/Lanjut, Selesai, dan Rekam Ulang.
    - Timer digital berjalan dan animasi gelombang suara saat mikrofon aktif.
    - Pemutar audio mini (*preview*) sebelum rekaman diunggah ke Google Drive.
-3. **Dikte Langsung Suara ke Teks (Web Speech API)**:
+4. **Dikte Langsung Suara ke Teks (Web Speech API)**:
    - Cukup klik tombol mikrofon pada kolom **Agenda**, **Hasil Kesepakatan**, atau **Tindak Lanjut** dan bicaralah dalam Bahasa Indonesia.
    - Kata-kata yang diucapkan akan langsung terketik otomatis secara *real-time*.
-4. **Format Cetak Berita Acara Resmi**:
+5. **Format Cetak Berita Acara Resmi**:
    - Menghasilkan lembar dokumen resmi standar Berita Acara (Kop instansi, nomor berita acara, waktu/tempat, pimpinan rapat, daftar hadir, risalah, serta kolom tanda tangan pimpinan dan notulis).
    - Dilengkapi tombol cetak langsung atau simpan ke file PDF (*Print to PDF*).
-5. **UI/UX Elegan & Responsif**:
+6. **UI/UX Elegan & Responsif**:
    - Desain formal bernuansa *Deep Royal Navy Blue* (`#1E3A8A`), putih, dan abu-abu terang.
    - Ramah perangkat desktop, tablet, maupun smartphone (*mobile-friendly*).
    - Pengaturan URL Web App fleksibel melalui modal konfigurasi dengan fitur uji koneksi instan.
