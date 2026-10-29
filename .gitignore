@@ -1,0 +1,10 @@
+# OS generated files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Logs and databases
+*.log
+.vscode/
+.idea/
