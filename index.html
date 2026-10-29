@@ -1243,20 +1243,51 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           }
         };
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+        const candidateModels = [
+          "gemini-3.8-flash",
+          "gemini-2.5-flash",
+          "gemini-1.5-flash"
+        ];
 
-        const response = await fetch(geminiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
+        let response = null;
+        let lastErrorMsg = "";
 
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          const errMsg = errData.error ? errData.error.message : `HTTP status ${response.status}`;
-          throw new Error(errMsg);
+        for (const modelName of candidateModels) {
+          procMsg.innerText = `Menghubungi Gemini AI (${modelName}) untuk menganalisis rekaman suara...`;
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`;
+
+          try {
+            const res = await fetch(geminiUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": geminiApiKey
+              },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              response = res;
+              break;
+            } else {
+              const errData = await res.json().catch(() => ({}));
+              lastErrorMsg = errData.error ? errData.error.message : `HTTP status ${res.status}`;
+              if (res.status === 404 || lastErrorMsg.includes("not found") || lastErrorMsg.includes("not supported")) {
+                console.warn(`Model ${modelName} tidak tersedia, mencoba model berikutnya...`);
+                continue;
+              } else {
+                throw new Error(lastErrorMsg);
+              }
+            }
+          } catch (fetchErr) {
+            if (fetchErr.message && !fetchErr.message.includes("not found")) {
+              throw fetchErr;
+            }
+          }
+        }
+
+        if (!response) {
+          throw new Error(lastErrorMsg || "Model Gemini AI tidak dapat diakses.");
         }
 
         const data = await response.json();
