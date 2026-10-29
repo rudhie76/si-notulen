@@ -747,8 +747,8 @@
      * STATE MANAJEMEN APLIKASI
      * ========================================================================
      */
-    // Ganti URL default ini dengan URL Web App Apps Script Anda, atau buka link dengan parameter ?gas=URL_ANDA
-    const DEFAULT_GAS_URL = ""; 
+    // URL Resmi Backend Google Apps Script Web App (Terkoneksi Otomatis ke Google Drive)
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyIwHyGfax9VvYg-Ca9GZE43wJsLJSo2kCbtWeZPfBky-ttjwgGG7be9-F8qxGtUkJ5kA/exec"; 
     const STORAGE_KEY_GAS_URL = "si_notulen_gas_web_app_url";
     const STORAGE_KEY_LOCAL_DB = "si_notulen_local_demo_db";
 
@@ -768,9 +768,16 @@
       window.history.replaceState({ path: cleanUrl }, "", cleanUrl);
     }
 
+    // Pastikan jika localStorage kosong atau bernilai lama, default ke DEFAULT_GAS_URL resmi
+    let savedStoredUrl = localStorage.getItem(STORAGE_KEY_GAS_URL);
+    if (!savedStoredUrl || savedStoredUrl.trim() === "") {
+      savedStoredUrl = DEFAULT_GAS_URL;
+      localStorage.setItem(STORAGE_KEY_GAS_URL, DEFAULT_GAS_URL);
+    }
+
     let gasWebAppUrl = (injectedUrl && injectedUrl.startsWith("http")) 
       ? injectedUrl 
-      : (localStorage.getItem(STORAGE_KEY_GAS_URL) || DEFAULT_GAS_URL);
+      : (savedStoredUrl || DEFAULT_GAS_URL);
     let meetingsList = [];
 
     // State MediaRecorder (Perekam Audio)

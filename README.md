@@ -88,11 +88,11 @@ Anda dapat membuka file `index.html` langsung di browser Anda (klik ganda file `
 5. Klik **Simpan Konfigurasi**. Pengaturan ini otomatis tersimpan di browser Anda (`localStorage`).
 
 ### Cara 2: Menetapkan URL Secara Permanen di Kode
-Buka file `index.html`, cari baris berikut di bagian awal script:
+Buka file `index.html`, baris berikut telah otomatis dikonfigurasi ke URL Web App Anda:
 ```javascript
-const DEFAULT_GAS_URL = "TEMPELKAN_URL_WEB_APP_APPS_SCRIPT_ANDA_DI_SINI";
+const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyIwHyGfax9VvYg-Ca9GZE43wJsLJSo2kCbtWeZPfBky-ttjwgGG7be9-F8qxGtUkJ5kA/exec";
 ```
-Simpan file, dan aplikasi akan selalu terhubung secara *default*.
+Aplikasi langsung terhubung secara otomatis ke Google Drive tanpa konfigurasi manual.
 
 ---
 
