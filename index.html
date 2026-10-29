@@ -426,19 +426,26 @@
             <textarea id="input-agenda" rows="3" required placeholder="1. Pembukaan dan evaluasi laporan kerja&#10;2. Pembahasan kendala operasional&#10;3. Alokasi anggaran program baru" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-navy-800/30 focus:border-navy-800"></textarea>
           </div>
 
-          <!-- Hasil Kesepakatan with Dictation Button -->
+          <!-- Hasil Kesepakatan with Dictation & AI Button -->
           <div>
-            <div class="flex items-center justify-between mb-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
               <label class="text-xs font-bold uppercase tracking-wider text-slate-600">
                 Hasil Kesepakatan / Risalah Rapat <span class="text-red-500">*</span>
               </label>
-              <!-- Speech-to-Text Button for Kesepakatan -->
-              <button type="button" onclick="toggleDictation('input-hasil', this)" class="inline-flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 transition-colors dictation-btn" title="Klik untuk mendiktekan teks menggunakan suara Anda">
-                <i class="fa-solid fa-microphone text-xs"></i>
-                <span class="btn-text">Dikte Suara</span>
-              </button>
+              <div class="flex items-center space-x-2">
+                <!-- AI Summarize from Audio Button -->
+                <button type="button" onclick="transcribeAndSummarizeAudioWithAI()" class="inline-flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors cursor-pointer" title="Rangkum otomatis dari rekaman audio rapat menggunakan Gemini AI">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-xs"></i>
+                  <span>Rangkum dari Audio (AI)</span>
+                </button>
+                <!-- Speech-to-Text Button for Kesepakatan -->
+                <button type="button" onclick="toggleDictation('input-hasil', this)" class="inline-flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 transition-colors dictation-btn" title="Klik untuk mendiktekan teks menggunakan suara Anda">
+                  <i class="fa-solid fa-microphone text-xs"></i>
+                  <span class="btn-text">Dikte Suara</span>
+                </button>
+              </div>
             </div>
-            <textarea id="input-hasil" rows="4" required placeholder="Catat poin-poin kesepakatan rapat di sini... Anda juga bisa menekan tombol Dikte Suara untuk langsung berbicara dan suara Anda akan otomatis terketik dalam Bahasa Indonesia." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-navy-800/30 focus:border-navy-800"></textarea>
+            <textarea id="input-hasil" rows="4" required placeholder="Catat poin-poin kesepakatan rapat di sini... Anda bisa mengetik manual, mendiktekan langsung dengan mikrofon, atau gunakan tombol 'Rangkum dari Audio (AI)' untuk merangkum otomatis dari rekaman suara rapat." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-navy-800/30 focus:border-navy-800"></textarea>
           </div>
 
           <!-- Tindak Lanjut with Dictation Button -->
@@ -530,15 +537,49 @@
           </div>
 
           <!-- Audio Preview Player (Muncul setelah selesai rekam) -->
-          <div id="audio-preview-container" class="hidden bg-white/5 border border-white/10 rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center space-x-3 w-full sm:w-auto">
-              <i class="fa-solid fa-circle-play text-2xl text-emerald-400"></i>
-              <div>
-                <p class="text-xs font-bold text-white">Hasil Rekaman Siap Diunggah</p>
-                <p id="audio-file-meta" class="text-[11px] text-blue-200/70">Durasi: 00:00 | Ukuran: ~0 KB</p>
+          <div id="audio-preview-container" class="hidden bg-white/5 border border-white/10 rounded-xl p-4 space-y-3.5">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="flex items-center space-x-3 w-full sm:w-auto">
+                <i class="fa-solid fa-circle-play text-2xl text-emerald-400"></i>
+                <div>
+                  <p class="text-xs font-bold text-white">Hasil Rekaman Siap Diunggah</p>
+                  <p id="audio-file-meta" class="text-[11px] text-blue-200/70">Durasi: 00:00 | Ukuran: ~0 KB</p>
+                </div>
               </div>
+              <audio id="audio-player" controls class="w-full sm:max-w-md h-9"></audio>
             </div>
-            <audio id="audio-player" controls class="w-full sm:max-w-md h-9"></audio>
+
+            <!-- Tombol Aksi AI: Transkripsi & Rangkum Otomatis -->
+            <div class="pt-2.5 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div class="text-[11px] text-blue-200/80 flex items-center space-x-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-300 flex-shrink-0"></i>
+                <span>Ingin hasil rapat otomatis? Biarkan AI mendengarkan rekaman dan mengisi hasil kesepakatan & tindak lanjut.</span>
+              </div>
+              <button type="button" id="btn-ai-summarize" onclick="transcribeAndSummarizeAudioWithAI()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-purple-900/40 transition flex items-center justify-center space-x-2 cursor-pointer flex-shrink-0">
+                <i class="fa-solid fa-brain text-amber-300"></i>
+                <span>Transkrip & Rangkum dengan AI</span>
+              </button>
+            </div>
+
+            <!-- State Loading Proses AI -->
+            <div id="ai-processing-state" class="hidden p-3 rounded-lg bg-purple-950/70 border border-purple-500/40 text-xs text-purple-200 flex items-center space-x-3 animate-pulse">
+              <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent"></div>
+              <span id="ai-processing-msg" class="font-semibold">Menghubungkan ke Google Gemini AI untuk memproses rekaman suara...</span>
+            </div>
+
+            <!-- Box Transkrip Lengkap Percakapan (Collapsible) -->
+            <div id="ai-transcript-box" class="hidden p-3 rounded-lg bg-black/40 border border-white/10 text-xs space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-blue-200 flex items-center space-x-1.5">
+                  <i class="fa-solid fa-file-lines text-amber-300"></i>
+                  <span>Transkrip Percakapan Rapat (Hasil AI)</span>
+                </span>
+                <button type="button" onclick="toggleTranscriptView()" class="text-[11px] text-blue-300 hover:text-white underline cursor-pointer" id="btn-toggle-transcript">
+                  Tutup
+                </button>
+              </div>
+              <div id="ai-transcript-content" class="text-slate-300 text-[11px] max-h-36 overflow-y-auto whitespace-pre-line leading-relaxed p-2 bg-black/30 rounded border border-white/5 font-mono"></div>
+            </div>
           </div>
         </div>
 
@@ -782,6 +823,26 @@
           <p class="text-[11px] text-slate-500 mt-1">Dapatkan URL ini dari menu <strong>Deploy > New Deployment > Web App (Who has access: Anyone)</strong> pada Google Apps Script.</p>
         </div>
 
+        <!-- Konfigurasi Google Gemini AI Key -->
+        <div class="border-t border-slate-100 pt-3">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              Google Gemini AI API Key (Untuk Transkripsi & Rangkuman Audio)
+            </label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[11px] text-blue-600 hover:text-blue-800 hover:underline flex items-center space-x-1 font-semibold">
+              <span>Dapatkan Kunci Gratis</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </a>
+          </div>
+          <div class="relative">
+            <input type="password" id="setting-gemini-key" placeholder="AIzaSy..." class="w-full pl-3.5 pr-10 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-purple-600/30 focus:border-purple-600">
+            <button type="button" onclick="togglePasswordVisibility('setting-gemini-key', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Digunakan untuk mendengarkan rekaman rapat dan menyusun otomatis <strong>Hasil Kesepakatan</strong> dan <strong>Tindak Lanjut</strong>. Disimpan secara lokal di browser Anda.</p>
+        </div>
+
         <div id="test-connection-result" class="hidden p-3 rounded-xl text-xs font-medium"></div>
       </div>
 
@@ -816,7 +877,10 @@
     // URL Resmi Backend Google Apps Script Web App (Terkoneksi Otomatis ke Google Drive)
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyIwHyGfax9VvYg-Ca9GZE43wJsLJSo2kCbtWeZPfBky-ttjwgGG7be9-F8qxGtUkJ5kA/exec"; 
     const STORAGE_KEY_GAS_URL = "si_notulen_gas_web_app_url";
+    const STORAGE_KEY_GEMINI_KEY = "si_notulen_gemini_api_key";
     const STORAGE_KEY_LOCAL_DB = "si_notulen_local_demo_db";
+
+    let geminiApiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY) || "";
 
     // 1. Cek injeksi URL otomatis jika dijalankan langsung di Google Apps Script (HtmlService)
     const injectedUrl = "<?= typeof gasWebAppUrl !== 'undefined' ? gasWebAppUrl : '' ?>";
@@ -1077,6 +1141,9 @@
       document.getElementById("audio-wave-bars").classList.add("hidden");
       document.getElementById("audio-preview-container").classList.add("hidden");
       document.getElementById("audio-player").src = "";
+      document.getElementById("ai-processing-state").classList.add("hidden");
+      document.getElementById("ai-transcript-box").classList.add("hidden");
+      document.getElementById("ai-transcript-content").innerText = "";
 
       document.getElementById("btn-start-record").disabled = false;
       document.getElementById("btn-start-record").classList.remove("opacity-40", "cursor-not-allowed");
@@ -1091,6 +1158,172 @@
       const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
       const s = String(sec % 60).padStart(2, "0");
       return `${h}:${m}:${s}`;
+    }
+
+    // ========================================================================
+    // MODUL AI TRANSKRIPSI & PERANGKUM NOTULEN DARI REKAMAN AUDIO (GEMINI AI)
+    // ========================================================================
+    async function transcribeAndSummarizeAudioWithAI() {
+      if (!audioBase64) {
+        showToast("Belum ada rekaman audio rapat. Silakan rekam suara rapat terlebih dahulu.", "info");
+        return;
+      }
+
+      if (!geminiApiKey || geminiApiKey.trim() === "") {
+        const inputKey = prompt(
+          "Untuk menggunakan fitur AI Transkripsi & Rangkuman Otomatis, silakan masukkan Google Gemini API Key Anda:\n(Dapatkan Kunci Gratis tanpa kartu kredit di https://aistudio.google.com/app/apikey)",
+          ""
+        );
+        if (inputKey && inputKey.trim() !== "") {
+          geminiApiKey = inputKey.trim();
+          localStorage.setItem(STORAGE_KEY_GEMINI_KEY, geminiApiKey);
+        } else {
+          showToast("Gemini API Key diperlukan untuk memproses audio dengan AI.", "info");
+          openSettingsModal();
+          return;
+        }
+      }
+
+      const btn = document.getElementById("btn-ai-summarize");
+      const originalBtnHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>AI Sedang Menganalisis Audio...</span>';
+
+      const procBox = document.getElementById("ai-processing-state");
+      const procMsg = document.getElementById("ai-processing-msg");
+      procBox.classList.remove("hidden");
+      procMsg.innerText = "Mempersiapkan berkas audio dan menghubungkan ke Google Gemini AI...";
+
+      try {
+        // Ambil clean Base64 data dan tentukan MIME audio
+        let cleanBase64 = audioBase64;
+        let mimeType = "audio/webm";
+        if (cleanBase64.indexOf(",") > -1) {
+          const parts = cleanBase64.split(",");
+          const header = parts[0];
+          cleanBase64 = parts[1];
+          const mMatch = header.match(/data:([^;]+)/);
+          if (mMatch) mimeType = mMatch[1];
+        }
+        if (mimeType.includes(";")) {
+          mimeType = mimeType.split(";")[0].trim();
+        }
+
+        procMsg.innerText = "Gemini AI sedang mendengarkan seluruh rekaman suara rapat...";
+
+        const promptText = `Anda adalah asisten notulis rapat profesional dan berpengalaman dalam tata kelola pemerintahan, korporasi, dan organisasi di Indonesia.
+Tugas Anda: Dengarkan seluruh rekaman percakapan audio rapat ini dengan teliti, pahami isi pembicaraannya, lalu susun risalah rapat resmi dalam Bahasa Indonesia yang formal, terstruktur, dan akurat.
+
+Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`json) dengan format objek berikut:
+{
+  "transkripLengkap": "Ringkasan kronologis alur diskusi apa saja yang dibahas oleh para pembicara dalam rapat",
+  "hasilKesepakatan": "Poin-poin kesepakatan, risalah resmi, dan keputusan rapat yang disetujui bersama (Tuliskan dalam format poin bernomor 1., 2., 3. dengan bahasa formal, jelas, dan tegas)",
+  "tindakLanjut": "Rencana aksi konkret, penanggung jawab/PIC (nama pejabat/divisi/instansi), dan batas waktu/deadline (Tuliskan dalam format poin bernomor 1., 2., 3.)"
+}`;
+
+        const payload = {
+          contents: [
+            {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: mimeType,
+                    data: cleanBase64
+                  }
+                },
+                {
+                  text: promptText
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.2,
+            responseMimeType: "application/json"
+          }
+        };
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+
+        const response = await fetch(geminiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.error ? errData.error.message : `HTTP status ${response.status}`;
+          throw new Error(errMsg);
+        }
+
+        const data = await response.json();
+        const candidate = data.candidates && data.candidates[0];
+        if (!candidate || !candidate.content || !candidate.content.parts || !candidate.content.parts[0]) {
+          throw new Error("Tidak menerima respons dari Gemini AI.");
+        }
+
+        let rawResponseText = candidate.content.parts[0].text.trim();
+        if (rawResponseText.startsWith("```json")) {
+          rawResponseText = rawResponseText.replace(/^```json\s*/i, "").replace(/\s*```$/i, "");
+        } else if (rawResponseText.startsWith("```")) {
+          rawResponseText = rawResponseText.replace(/^```\s*/i, "").replace(/\s*```$/i, "");
+        }
+
+        const resultJson = JSON.parse(rawResponseText);
+
+        // Isi otomatis ke kolom Hasil Kesepakatan & Tindak Lanjut
+        if (resultJson.hasilKesepakatan) {
+          const el = document.getElementById("input-hasil");
+          el.value = resultJson.hasilKesepakatan;
+          highlightField(el);
+        }
+
+        if (resultJson.tindakLanjut) {
+          const el = document.getElementById("input-tindaklanjut");
+          el.value = resultJson.tindakLanjut;
+          highlightField(el);
+        }
+
+        // Tampilkan Transkrip Lengkap jika ada
+        if (resultJson.transkripLengkap) {
+          const tBox = document.getElementById("ai-transcript-box");
+          const tContent = document.getElementById("ai-transcript-content");
+          tContent.innerText = resultJson.transkripLengkap;
+          tBox.classList.remove("hidden");
+        }
+
+        // Scroll halus ke Section 2 agar pengguna langsung melihat hasilnya
+        document.getElementById("input-hasil").scrollIntoView({ behavior: "smooth", block: "center" });
+
+        showToast("Hasil kesepakatan dan tindak lanjut berhasil disusun otomatis oleh Gemini AI!", "success");
+
+      } catch (err) {
+        console.error("Kesalahan AI Gemini:", err);
+        let errorMsg = err.message;
+        if (errorMsg.includes("API_KEY_INVALID") || errorMsg.includes("API key not valid")) {
+          errorMsg = "API Key Gemini tidak valid. Silakan periksa kembali di menu Pengaturan.";
+        }
+        showToast("Gagal memproses dengan AI: " + errorMsg, "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        procBox.classList.add("hidden");
+      }
+    }
+
+    function toggleTranscriptView() {
+      const box = document.getElementById("ai-transcript-content");
+      const btn = document.getElementById("btn-toggle-transcript");
+      if (box.classList.contains("hidden")) {
+        box.classList.remove("hidden");
+        btn.innerText = "Tutup";
+      } else {
+        box.classList.add("hidden");
+        btn.innerText = "Lihat Transkrip";
+      }
     }
 
     // ========================================================================
@@ -2033,6 +2266,7 @@
     // ========================================================================
     function openSettingsModal() {
       document.getElementById("setting-gas-url").value = gasWebAppUrl || "";
+      document.getElementById("setting-gemini-key").value = geminiApiKey || "";
       document.getElementById("test-connection-result").className = "hidden";
       document.getElementById("modal-settings").classList.remove("hidden");
     }
@@ -2045,11 +2279,27 @@
       const newUrl = document.getElementById("setting-gas-url").value.trim();
       gasWebAppUrl = newUrl;
       localStorage.setItem(STORAGE_KEY_GAS_URL, newUrl);
+
+      const newKey = document.getElementById("setting-gemini-key").value.trim();
+      geminiApiKey = newKey;
+      localStorage.setItem(STORAGE_KEY_GEMINI_KEY, newKey);
       
       updateConnectionStatusUI();
       closeSettingsModal();
-      showToast("Konfigurasi URL Google Apps Script disimpan!", "success");
+      showToast("Konfigurasi tersimpan!", "success");
       fetchMeetingsFromAPI();
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      if (inp.type === "password") {
+        inp.type = "text";
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+      } else {
+        inp.type = "password";
+        btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+      }
     }
 
     async function testGasConnection() {
