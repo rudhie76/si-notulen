@@ -95,21 +95,37 @@
     .wave-bar:nth-child(5) { animation-delay: 0.2s; }
     .wave-bar:nth-child(6) { animation-delay: 0.35s; }
 
-    /* Print styling khusus Berita Acara Formal */
+    /* Print styling khusus Berita Acara Formal & Visual Note 1 Halaman */
     @media print {
       body * {
         visibility: hidden !important;
       }
-      #print-area, #print-area * {
+      body:not(.print-visual-note-mode) #print-area,
+      body:not(.print-visual-note-mode) #print-area * {
         visibility: visible !important;
       }
-      #print-area {
+      body:not(.print-visual-note-mode) #print-area {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 20px !important;
+        box-shadow: none !important;
+        background: white !important;
+      }
+
+      body.print-visual-note-mode #visual-note-print-area,
+      body.print-visual-note-mode #visual-note-print-area * {
+        visibility: visible !important;
+      }
+      body.print-visual-note-mode #visual-note-print-area {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 15px !important;
         box-shadow: none !important;
         background: white !important;
       }
@@ -219,6 +235,116 @@
       </div>
     </section>
 
+    <!-- ================= ALUR KERJA KHUSUS RAPAT TATAP MUKA (3 LANGKAH PRAKTIS) ================= -->
+    <section class="bg-gradient-to-br from-white via-slate-50 to-blue-50/40 rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/70 pb-3.5">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-navy-900 to-blue-600 text-white flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-users-rectangle"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-base sm:text-lg font-bold text-navy-950">Alur Khusus Rapat Tatap Muka</h2>
+              <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-1">
+                <i class="fa-solid fa-location-dot text-emerald-600 text-[10px]"></i>
+                <span>100% Khusus Offline / Meja Rapat</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-500">Cukup taruh ponsel di meja. Tanpa bot Zoom/Teams, seluruh notulensi dirumuskan otomatis oleh AI.</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button type="button" onclick="startQuickTableMeeting()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 flex items-center space-x-2 transition transform hover:-translate-y-0.5 cursor-pointer">
+            <i class="fa-solid fa-microphone-lines animate-pulse"></i>
+            <span>Mulai Rapat di Meja</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3 Kartu Alur Kerja Tatap Muka -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- Kartu 1: Rekam di Meja Rapat -->
+        <div class="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-red-500"></div>
+          <div>
+            <div class="w-7 h-7 rounded-full bg-red-50 text-red-600 border border-red-200 flex items-center justify-center font-black text-xs mb-3">
+              1
+            </div>
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-mobile-screen-button text-red-600 text-sm"></i>
+              <h3 class="font-bold text-sm sm:text-base text-slate-900">Rekam di Meja Rapat</h3>
+            </div>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Letakkan ponsel atau laptop di tengah meja rapat. Layar dijaga tetap menyala (<em>Wake Lock</em>) tanpa perlu bot virtual Zoom, Meet, atau Teams.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="inline-flex items-center space-x-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+              <i class="fa-solid fa-sun text-amber-500 text-[10px]"></i>
+              <span>Layar Tetap Aktif</span>
+            </span>
+            <button type="button" onclick="startQuickTableMeeting()" class="text-xs font-bold text-red-600 hover:text-red-700 hover:underline">
+              Mulai &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Kartu 2: Dapatkan Catatan Rapat -->
+        <div class="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
+          <div>
+            <div class="w-7 h-7 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-black text-xs mb-3">
+              2
+            </div>
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-purple-600 text-sm"></i>
+              <h3 class="font-bold text-sm sm:text-base text-slate-900">Dapatkan Catatan Rapat</h3>
+            </div>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Gemini AI mendengarkan suara ruangan, menyusun transkrip percakapan, poin kesepakatan resmi, tindak lanjut PIC, dan <strong>Visual Note 1 Halaman</strong>.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="inline-flex items-center space-x-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
+              <i class="fa-solid fa-brain text-purple-500 text-[10px]"></i>
+              <span>Visual Note 1 Halaman</span>
+            </span>
+            <button type="button" onclick="previewSampleVisualNote()" class="text-xs font-bold text-purple-700 hover:text-purple-800 hover:underline">
+              Lihat Format &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Kartu 3: Selesaikan Tindak Lanjut -->
+        <div class="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
+          <div>
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-black text-xs mb-3">
+              3
+            </div>
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-share-nodes text-emerald-600 text-sm"></i>
+              <h3 class="font-bold text-sm sm:text-base text-slate-900">Selesaikan Tindak Lanjut</h3>
+            </div>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Cetak Berita Acara resmi instansi (PDF), sinkronkan Action Plan ke Google Sheets, dan sebarkan ringkasan rapat langsung ke grup WhatsApp peserta.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="inline-flex items-center space-x-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              <i class="fa-brands fa-whatsapp text-emerald-600 text-[10px]"></i>
+              <span>Kirim ke WhatsApp</span>
+            </span>
+            <button type="button" onclick="shareLatestMeetingWhatsApp()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+              Bagikan &rarr;
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- Navigation Tabs -->
     <div class="flex border-b border-slate-200 text-sm font-semibold">
       <button id="nav-btn-list" onclick="switchTab('tab-list')" class="py-3 px-5 border-b-2 border-navy-800 text-navy-800 flex items-center space-x-2 transition-all">
@@ -283,6 +409,27 @@
     <!-- ================= TAB 2: BUAT NOTULEN BARU ================= -->
     <div id="tab-create" class="hidden space-y-6">
       
+      <!-- Edit Mode Notification Banner -->
+      <div id="edit-mode-banner" class="hidden bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-600 text-white p-4 sm:p-5 rounded-2xl shadow-md border border-amber-400/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
+        <div class="flex items-center space-x-3.5">
+          <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl text-white shadow-inner flex-shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-sm sm:text-base">Mode Edit Notulen Rapat</span>
+              <span id="edit-mode-badge-id" class="bg-black/30 font-mono text-xs px-2.5 py-0.5 rounded-full font-bold">NOT-XXXX</span>
+            </div>
+            <p class="text-xs text-amber-100 mt-0.5">Perbaiki informasi rapat, perbarui kesepakatan, atau unggah rekaman audio dan berkas baru agar hasil notulen sempurna.</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 self-end sm:self-auto flex-shrink-0">
+          <button type="button" onclick="cancelEditMode()" class="px-3.5 py-2 rounded-xl bg-white text-amber-900 hover:bg-amber-50 text-xs font-bold shadow transition cursor-pointer">
+            <i class="fa-solid fa-xmark mr-1"></i> Batal Edit
+          </button>
+        </div>
+      </div>
+
       <form id="form-notulen" onsubmit="handleFormSubmit(event)" class="space-y-6">
         
         <!-- Bagian 1: Data Identitas Rapat -->
@@ -319,6 +466,28 @@
                   <span>Unggah Undangan</span>
                 </button>
                 <input type="file" id="input-undangan-file" class="hidden" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt" onchange="handleUndanganSelected(event)">
+              </div>
+            </div>
+
+            <!-- Card Berkas Undangan Tersimpan (Mode Edit) -->
+            <div id="existing-undangan-card" class="hidden bg-blue-100/90 border border-blue-300 rounded-xl p-3 sm:p-4 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-700 text-white flex items-center justify-center text-lg flex-shrink-0">
+                  <i class="fa-solid fa-envelope-open-text"></i>
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <p class="text-xs sm:text-sm font-bold text-navy-950">Berkas Surat Undangan Tersimpan di Google Drive</p>
+                    <span class="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full">Tersimpan</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mt-0.5">Berkas undangan lama akan tetap dipertahankan kecuali Anda mengunggah berkas baru.</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <a id="existing-undangan-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-semibold flex items-center space-x-1 shadow transition">
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  <span>Buka Undangan</span>
+                </a>
               </div>
             </div>
 
@@ -466,17 +635,42 @@
 
         <!-- Bagian 3: Modul Perekam Suara Rapat (MediaRecorder API) -->
         <div class="bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800 text-white p-5 sm:p-7 rounded-2xl shadow-md border border-navy-700/60 space-y-4">
-          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div class="flex items-center space-x-2.5">
               <div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center">
                 <i class="fa-solid fa-record-vinyl"></i>
               </div>
               <div>
-                <h3 class="text-sm sm:text-base font-bold text-white">3. Perekam Suara Jalannya Rapat</h3>
-                <p class="text-xs text-blue-200/70">Rekam langsung dari mikrofon perangkat Anda dan unggah otomatis ke Google Drive</p>
+                <h3 class="text-sm sm:text-base font-bold text-white">3. Perekam Suara Rapat Tatap Muka (Taruh di Meja)</h3>
+                <p class="text-xs text-blue-200/70">Cukup letakkan ponsel di tengah meja rapat. Layar tetap aktif & seluruh peserta terdengar jernih.</p>
               </div>
             </div>
-            <span class="text-xs bg-white/10 text-blue-100 px-2.5 py-1 rounded-full font-medium">MediaRecorder API</span>
+            <div class="flex items-center space-x-2">
+              <span id="wake-lock-badge" class="hidden text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full font-semibold flex items-center space-x-1.5">
+                <i class="fa-solid fa-sun text-amber-300 animate-pulse text-[11px]"></i>
+                <span>Layar Tetap Aktif</span>
+              </span>
+              <span class="text-xs bg-white/10 text-blue-100 px-2.5 py-1 rounded-full font-medium">Mode Meja Rapat</span>
+            </div>
+          </div>
+
+          <!-- Card Rekaman Audio Tersimpan (Mode Edit) -->
+          <div id="existing-audio-card" class="hidden bg-emerald-950/70 border border-emerald-500/40 rounded-xl p-3 sm:p-4 text-xs space-y-2">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-sm flex-shrink-0">
+                  <i class="fa-solid fa-microphone-lines"></i>
+                </div>
+                <div>
+                  <span class="font-bold text-white text-xs sm:text-sm">Rekaman Audio Rapat Tersimpan di Google Drive</span>
+                  <p class="text-[11px] text-emerald-300/80">Audio lama tersimpan aman. Rekam ulang atau unggah file audio baru jika ingin menggantikannya.</p>
+                </div>
+              </div>
+              <a id="existing-audio-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow transition flex-shrink-0">
+                <i class="fa-solid fa-circle-play text-xs"></i>
+                <span>Dengar Audio Tersimpan</span>
+              </a>
+            </div>
           </div>
 
           <!-- Recorder Control Console -->
@@ -495,7 +689,7 @@
                   <span id="record-timer" class="font-mono text-2xl sm:text-3xl font-extrabold tracking-wider text-white">00:00:00</span>
                   <span id="record-status-label" class="text-xs font-semibold px-2 py-0.5 rounded bg-white/10 text-blue-200">Siap Merekam</span>
                 </div>
-                <p class="text-[11px] text-blue-300/70 mt-0.5">Format rekaman: audio/webm (Kualitas Suara HD)</p>
+                <p class="text-[11px] text-blue-300/70 mt-0.5">Format rekaman: audio/webm (Kualitas Suara HD Meja)</p>
               </div>
 
               <!-- Audio Waveform Animation Bars (Active when recording) -->
@@ -529,10 +723,37 @@
                 <span>Selesai</span>
               </button>
 
+              <!-- Unggah File Rekaman Audio -->
+              <input type="file" id="input-audio-file" class="hidden" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.webm,.opus" onchange="handleAudioFileSelected(event)">
+              <button type="button" id="btn-upload-audio" onclick="document.getElementById('input-audio-file').click()" class="inline-flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-md transition cursor-pointer" title="Unggah file rekaman dari ponsel / perekam suara (MP3, WAV, M4A, WEBM)">
+                <i class="fa-solid fa-file-audio text-xs"></i>
+                <span>Unggah Audio</span>
+              </button>
+
+              <!-- Tombol Buka Mode Meja Rapat (Layar Penuh Meja) -->
+              <button type="button" id="btn-open-table-mode" onclick="openTableMode()" class="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-navy-800 hover:bg-navy-700 text-blue-200 hover:text-white font-semibold text-xs sm:text-sm border border-blue-400/30 shadow transition cursor-pointer" title="Buka Layar Fokus Khusus Meja Rapat">
+                <i class="fa-solid fa-expand text-xs"></i>
+                <span>Layar Meja</span>
+              </button>
+
               <!-- Reset / Hapus -->
               <button type="button" id="btn-reset-record" onclick="resetAudioRecording()" title="Batal & Hapus Rekaman" class="hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs border border-white/10 transition">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
+            </div>
+          </div>
+
+          <!-- Sensitivitas Suara Meja Rapat Live Meter -->
+          <div id="recorder-sensitivity-container" class="hidden items-center justify-between bg-black/25 rounded-xl px-4 py-2.5 border border-white/10 text-xs">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-wave-square text-emerald-400 text-xs"></i>
+              <span id="audio-level-text" class="text-blue-200 font-medium">Sensitivitas Suara Meja: Mendeteksi suara ruangan...</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-28 sm:w-44 bg-white/10 h-2 rounded-full overflow-hidden border border-white/10">
+                <div id="audio-level-meter-bar" class="bg-gradient-to-r from-emerald-400 via-teal-400 to-blue-400 h-full rounded-full transition-all duration-75" style="width: 0%;"></div>
+              </div>
+              <span class="text-[10px] text-blue-300 font-mono">Live</span>
             </div>
           </div>
 
@@ -580,6 +801,33 @@
               </div>
               <div id="ai-transcript-content" class="text-slate-300 text-[11px] max-h-36 overflow-y-auto whitespace-pre-line leading-relaxed p-2 bg-black/30 rounded border border-white/5 font-mono"></div>
             </div>
+
+            <!-- Kartu Cepat Visual Note & WhatsApp (Muncul otomatis setelah AI selesai) -->
+            <div id="ai-result-quick-actions" class="hidden p-4 rounded-xl bg-gradient-to-r from-purple-950/90 via-indigo-950/80 to-navy-950/90 border border-purple-500/50 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/40 text-purple-300 flex items-center justify-center text-xl flex-shrink-0">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                </div>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-bold text-white">Visual Note & Ringkasan Siap Dibagikan!</h4>
+                  <p class="text-[11px] text-purple-200/80">Hasil kesepakatan dan tindak lanjut rapat tatap muka telah tersusun rapi.</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2 flex-wrap gap-y-1.5">
+                <button type="button" onclick="openCurrentFormVisualNote()" class="px-3.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow transition cursor-pointer">
+                  <i class="fa-solid fa-file-invoice"></i>
+                  <span>Buka Visual Note 1 Halaman</span>
+                </button>
+                <button type="button" onclick="shareCurrentFormWhatsApp()" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow transition cursor-pointer">
+                  <i class="fa-brands fa-whatsapp text-sm"></i>
+                  <span>Kirim ke WhatsApp</span>
+                </button>
+                <button type="button" onclick="copyCurrentFormWhatsApp()" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs border border-white/15 transition cursor-pointer" title="Salin Format Teks WhatsApp">
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -594,6 +842,26 @@
               <p class="text-xs text-slate-500 mt-0.5">Unggah berkas daftar hadir fisik bertanda tangan, slide presentasi, atau foto dokumentasi rapat</p>
             </div>
             <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Langkah 4 dari 4</span>
+          </div>
+
+          <!-- Card Berkas Lampiran Tersimpan (Mode Edit) -->
+          <div id="existing-lampiran-card" class="hidden bg-slate-100 border border-slate-300 rounded-xl p-3 sm:p-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg flex-shrink-0">
+                <i class="fa-solid fa-paperclip"></i>
+              </div>
+              <div>
+                <div class="flex items-center space-x-2">
+                  <p class="text-xs sm:text-sm font-bold text-slate-900">Berkas Lampiran / Foto Absensi Tersimpan di Drive</p>
+                  <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full border border-indigo-200">Tersimpan</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-0.5">Lampiran dokumen lama akan tetap tersimpan kecuali Anda mengunggah berkas baru di bawah ini.</p>
+              </div>
+            </div>
+            <a id="existing-lampiran-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-semibold flex items-center space-x-1 shadow transition">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              <span>Buka Lampiran</span>
+            </a>
           </div>
 
           <!-- Drag & Drop Zone -->
@@ -625,10 +893,13 @@
 
         <!-- Form Action Bar -->
         <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2">
-          <button type="button" onclick="resetFullForm()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-sm font-semibold transition">
+          <button type="button" id="btn-cancel-edit-form" onclick="cancelEditMode()" class="hidden w-full sm:w-auto px-5 py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 text-sm font-semibold transition cursor-pointer">
+            <i class="fa-solid fa-xmark mr-1"></i> Batal Edit
+          </button>
+          <button type="button" onclick="resetFullForm()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-sm font-semibold transition cursor-pointer">
             Reset Formulir
           </button>
-          <button type="submit" id="btn-submit-form" class="w-full sm:w-auto px-7 py-3 rounded-xl bg-navy-800 hover:bg-navy-900 text-white text-sm font-bold shadow-lg shadow-navy-800/20 hover:shadow-navy-800/30 transition flex items-center justify-center space-x-2">
+          <button type="submit" id="btn-submit-form" class="w-full sm:w-auto px-7 py-3 rounded-xl bg-navy-800 hover:bg-navy-900 text-white text-sm font-bold shadow-lg shadow-navy-800/20 hover:shadow-navy-800/30 transition flex items-center justify-center space-x-2 cursor-pointer">
             <i class="fa-solid fa-cloud-arrow-up"></i>
             <span>Simpan Notulen ke Google Drive</span>
           </button>
@@ -650,6 +921,10 @@
           <h4 class="font-bold text-sm sm:text-base">Format Cetak Berita Acara Rapat</h4>
         </div>
         <div class="flex items-center space-x-2">
+          <button onclick="editFromModalBeritaAcara()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition cursor-pointer" title="Perbaiki data atau unggah berkas untuk Berita Acara ini">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Edit Rapat</span>
+          </button>
           <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition">
             <i class="fa-solid fa-print"></i>
             <span>Cetak / Ekspor PDF</span>
@@ -864,6 +1139,232 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 4: MODE MEJA RAPAT (LAYAR PENUH MEJA) ================= -->
+  <div id="modal-table-mode" class="fixed inset-0 bg-slate-950 text-white z-50 hidden flex flex-col justify-between p-5 sm:p-10 select-none animate-in fade-in duration-200">
+    
+    <!-- Top Header in Table Mode -->
+    <div class="flex items-center justify-between w-full max-w-4xl mx-auto border-b border-white/10 pb-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-3.5 h-3.5 rounded-full bg-red-500 animate-ping"></div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-red-400">MODE MEJA RAPAT</span>
+            <span class="text-[10px] bg-red-600/30 text-red-200 px-2 py-0.5 rounded font-mono font-bold">RECORDING</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">Letakkan ponsel di tengah meja. Layar akan dijaga terus aktif.</p>
+        </div>
+      </div>
+
+      <!-- Wake Lock Indicator Pill & Minimize -->
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold">
+          <i class="fa-solid fa-sun text-amber-300 animate-pulse"></i>
+          <span class="hidden sm:inline">Layar Tetap Aktif</span>
+          <span>(Wake Lock ON)</span>
+        </span>
+        <button type="button" onclick="closeTableMode()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-semibold transition flex items-center space-x-1" title="Kecilkan ke Formulir">
+          <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
+          <span class="hidden sm:inline">Kecilkan</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Stage: Big Clock & Audio Visualizer -->
+    <div class="flex flex-col items-center justify-center text-center my-auto max-w-2xl mx-auto w-full space-y-6">
+      
+      <!-- Judul Rapat -->
+      <div class="space-y-1">
+        <p class="text-xs font-bold uppercase tracking-wider text-blue-300/80">Sedang Merekam Percakapan:</p>
+        <h2 id="table-mode-title" class="text-xl sm:text-3xl font-extrabold text-white tracking-tight line-clamp-2">Rapat Tatap Muka</h2>
+      </div>
+
+      <!-- Giant Digital Timer -->
+      <div class="relative py-2">
+        <div id="table-mode-timer" class="font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-wider text-white drop-shadow-[0_0_35px_rgba(239,68,68,0.35)]">
+          00:00:00
+        </div>
+        <div id="table-mode-status-label" class="inline-block mt-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold uppercase tracking-wider">
+          Mendengarkan Seluruh Peserta di Meja
+        </div>
+      </div>
+
+      <!-- Live Audio Sensitivity Meter & Visualizer -->
+      <div class="w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2.5 backdrop-blur-md">
+        <div class="flex items-center justify-between text-xs text-slate-300">
+          <span class="flex items-center space-x-1.5 font-semibold">
+            <i class="fa-solid fa-wave-square text-emerald-400"></i>
+            <span id="table-audio-level-text">Mendeteksi Suara Ruangan...</span>
+          </span>
+          <span class="font-mono text-[11px] text-slate-400">Mikrofon Meja Aktif</span>
+        </div>
+        <!-- Progress Level Bar -->
+        <div class="w-full bg-white/10 h-3 rounded-full overflow-hidden p-0.5 border border-white/15">
+          <div id="table-audio-level-bar" class="bg-gradient-to-r from-emerald-400 via-teal-400 to-blue-500 h-full rounded-full transition-all duration-100" style="width: 15%;"></div>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-400 max-w-md">
+        <i class="fa-solid fa-circle-info text-blue-400 mr-1"></i>
+        Bicara secara alami di meja rapat. Setelah agenda selesai, tekan tombol <strong>Selesai & Susun Notulen AI</strong>.
+      </p>
+
+    </div>
+
+    <!-- Bottom Controls in Table Mode -->
+    <div class="w-full max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-white/10">
+      <!-- Jeda / Lanjut -->
+      <button type="button" id="table-btn-pause" onclick="togglePauseRecording()" class="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition flex items-center space-x-2">
+        <i class="fa-solid fa-pause" id="table-btn-pause-icon"></i>
+        <span id="table-btn-pause-text">Jeda Rapat</span>
+      </button>
+
+      <!-- Selesai & AI Process -->
+      <button type="button" onclick="finishAndProcessFromTableMode()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-black text-sm shadow-xl shadow-emerald-900/50 transition flex items-center space-x-2 transform hover:scale-105">
+        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+        <span>Selesai & Susun Notulen AI</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ================= MODAL 5: VISUAL NOTE 1 HALAMAN (ONE-PAGER) ================= -->
+  <div id="modal-visual-note" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header Toolbar -->
+      <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-navy-900 text-white px-5 py-3.5 flex items-center justify-between no-print border-b border-white/10">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/30 text-amber-300 flex items-center justify-center">
+            <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm sm:text-base text-white">Visual Note 1 Halaman (One-Pager Summary)</h4>
+            <p class="text-[11px] text-purple-200/80">Ringkasan eksekutif padat hasil rapat tatap muka</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <!-- Edit Rapat -->
+          <button type="button" onclick="editFromModalVisualNote()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition cursor-pointer" title="Perbaiki data atau unggah berkas untuk rapat ini">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span class="hidden sm:inline">Edit Rapat</span>
+          </button>
+          <!-- WhatsApp Share -->
+          <button type="button" onclick="shareActiveVisualNoteWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition" title="Bagikan Ringkasan ke WhatsApp">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span class="hidden sm:inline">Kirim ke WhatsApp</span>
+          </button>
+          <!-- Copy WhatsApp -->
+          <button type="button" onclick="copyActiveVisualNoteWhatsApp()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-white/15 transition" title="Salin Format Teks WhatsApp">
+            <i class="fa-solid fa-copy"></i>
+          </button>
+          <!-- Print One-Pager -->
+          <button type="button" onclick="printVisualNote()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition" title="Cetak Ringkasan 1 Halaman">
+            <i class="fa-solid fa-print"></i>
+            <span class="hidden sm:inline">Cetak 1 Halaman</span>
+          </button>
+          <!-- Close -->
+          <button type="button" onclick="closeModalVisualNote()" class="text-white/70 hover:text-white p-1.5 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Visual Note One-Pager Sheet -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/80">
+        <div id="visual-note-print-area" class="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-md max-w-3xl mx-auto text-slate-800 space-y-5">
+          
+          <!-- Header Banner -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="bg-navy-900 text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded tracking-wider">VISUAL NOTE RAPAT</span>
+                <span id="vn-id" class="text-xs font-mono font-bold text-slate-500">NOT-20261030-XXXX</span>
+              </div>
+              <h1 id="vn-judul" class="text-xl sm:text-2xl font-extrabold text-navy-950 mt-1.5 tracking-tight leading-snug">Judul Rapat Tatap Muka</h1>
+            </div>
+            <div class="sm:text-right flex-shrink-0">
+              <span class="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200">
+                <i class="fa-solid fa-location-dot text-blue-600"></i>
+                <span id="vn-tempat">Ruang Rapat Utama</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Metadata Grid Chips -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400">Hari & Tanggal</p>
+              <p id="vn-tanggal" class="font-bold text-slate-800 mt-0.5">-</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400">Pimpinan Rapat</p>
+              <p id="vn-pimpinan" class="font-bold text-slate-800 mt-0.5">-</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400">Notulis</p>
+              <p id="vn-notulis" class="font-bold text-slate-800 mt-0.5">-</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400">Peserta Rapat</p>
+              <p id="vn-peserta" class="font-bold text-slate-800 mt-0.5 truncate">-</p>
+            </div>
+          </div>
+
+          <!-- Highlight / Inti Pembahasan Card -->
+          <div class="bg-gradient-to-r from-blue-900 via-navy-900 to-indigo-900 text-white rounded-xl p-4 shadow-sm space-y-1">
+            <div class="flex items-center space-x-2 text-amber-300 text-xs font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-lightbulb"></i>
+              <span>Inti Pembahasan & Agenda Utama</span>
+            </div>
+            <p id="vn-agenda" class="text-xs sm:text-sm text-blue-50/90 leading-relaxed font-normal whitespace-pre-line">-</p>
+          </div>
+
+          <!-- 2 Kolom: Hasil Kesepakatan & Tindak Lanjut -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Kolom Kesepakatan -->
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center space-x-2 border-b border-slate-200 pb-2">
+                <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 class="text-xs sm:text-sm font-bold text-slate-900">Poin Kesepakatan Resmi</h3>
+              </div>
+              <div id="vn-kesepakatan-list" class="space-y-2 text-xs text-slate-700 leading-relaxed">
+                <!-- Diisi secara dinamis -->
+              </div>
+            </div>
+
+            <!-- Kolom Action Items / Tindak Lanjut -->
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center space-x-2 border-b border-slate-200 pb-2">
+                <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-list-check"></i>
+                </div>
+                <h3 class="text-xs sm:text-sm font-bold text-slate-900">Rencana Aksi & PIC (Action Plan)</h3>
+              </div>
+              <div id="vn-tindaklanjut-list" class="space-y-2 text-xs text-slate-700 leading-relaxed">
+                <!-- Diisi secara dinamis -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer Verification Note -->
+          <div class="border-t border-slate-200 pt-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
+            <span class="flex items-center space-x-1.5">
+              <i class="fa-solid fa-shield-halved text-navy-800"></i>
+              <span>Disusun otomatis dari rekaman rapat tatap muka via <strong>SI-NOTULEN Digital</strong></span>
+            </span>
+            <span class="font-mono text-[10px]" id="vn-timestamp">Format 1 Halaman Siap Cetak</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
@@ -932,6 +1433,21 @@
     let activeRecognition = null;
     let activeDictationTargetId = null;
 
+    // State Khusus Rapat Tatap Muka: Wake Lock, Level Meter & Visual Note
+    let wakeLockSentinel = null;
+    let audioCtx = null;
+    let analyserNode = null;
+    let micSourceNode = null;
+    let audioLevelAnimFrame = null;
+    let currentActiveVisualNoteMeeting = null;
+
+    // State Mode Edit & Pembaruan Notulen
+    let editingMeetingId = null;
+    let editingMeetingAudioUrl = "";
+    let editingMeetingLampiranUrl = "";
+    let editingMeetingUndanganUrl = "";
+    let activeBeritaAcaraMeeting = null;
+
     // ========================================================================
     // INISIALISASI
     // ========================================================================
@@ -987,7 +1503,7 @@
     }
 
     // ========================================================================
-    // MODUL PEREKAM SUARA (MediaRecorder API)
+    // MODUL PEREKAM SUARA (MediaRecorder API) - KHUSUS MEJA RAPAT TATAP MUKA
     // ========================================================================
     async function startAudioRecording() {
       try {
@@ -996,7 +1512,13 @@
           return;
         }
 
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
         
         audioChunks = [];
         const options = { mimeType: "audio/webm;codecs=opus" };
@@ -1038,18 +1560,31 @@
 
           // Matikan semua track mikrofon
           stream.getTracks().forEach(track => track.stop());
+
+          // Matikan audio meter & lepas wake lock
+          stopAudioLevelMeter();
+          releaseWakeLock();
         };
 
         mediaRecorder.start(1000); // chunk setiap 1 detik
         recordSeconds = 0;
         isRecordingPaused = false;
+
+        // Aktifkan Screen Wake Lock (Layar tetap menyala di meja rapat)
+        await requestWakeLock();
+
+        // Aktifkan visualisasi sensitivitas suara ruangan via Web Audio API
+        setupAudioLevelMeter(stream);
         
         // Timer
         clearInterval(recordInterval);
         recordInterval = setInterval(() => {
           if (!isRecordingPaused) {
             recordSeconds++;
-            document.getElementById("record-timer").innerText = formatTimer(recordSeconds);
+            const timerStr = formatTimer(recordSeconds);
+            document.getElementById("record-timer").innerText = timerStr;
+            const tableTimer = document.getElementById("table-mode-timer");
+            if (tableTimer) tableTimer.innerText = timerStr;
           }
         }, 1000);
 
@@ -1069,7 +1604,10 @@
         document.getElementById("btn-stop-record").disabled = false;
         document.getElementById("btn-reset-record").classList.remove("hidden");
 
-        showToast("Perekaman suara rapat dimulai.", "info");
+        const tableStatus = document.getElementById("table-mode-status-label");
+        if (tableStatus) tableStatus.innerText = "Mendengarkan Seluruh Peserta di Meja";
+
+        showToast("Perekaman suara meja rapat dimulai. Layar dijaga tetap aktif.", "info");
 
       } catch (err) {
         console.error("Izin mikrofon ditolak atau gagal:", err);
@@ -1087,6 +1625,13 @@
         document.getElementById("record-status-label").innerText = "Dijeda";
         document.getElementById("record-status-label").className = "text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/30 text-amber-200";
         document.getElementById("recording-pulse-dot").classList.remove("recording-wave");
+
+        const tablePauseText = document.getElementById("table-btn-pause-text");
+        const tablePauseIcon = document.getElementById("table-btn-pause-icon");
+        const tableStatus = document.getElementById("table-mode-status-label");
+        if (tablePauseText) tablePauseText.innerText = "Lanjut Rapat";
+        if (tablePauseIcon) tablePauseIcon.className = "fa-solid fa-play";
+        if (tableStatus) tableStatus.innerText = "Perekaman Meja Sedang Dijeda";
       } else {
         mediaRecorder.resume();
         isRecordingPaused = false;
@@ -1094,6 +1639,13 @@
         document.getElementById("record-status-label").innerText = "Merekam Rapat...";
         document.getElementById("record-status-label").className = "text-xs font-semibold px-2 py-0.5 rounded bg-red-500/30 text-red-200";
         document.getElementById("recording-pulse-dot").classList.add("recording-wave");
+
+        const tablePauseText = document.getElementById("table-btn-pause-text");
+        const tablePauseIcon = document.getElementById("table-btn-pause-icon");
+        const tableStatus = document.getElementById("table-mode-status-label");
+        if (tablePauseText) tablePauseText.innerText = "Jeda Rapat";
+        if (tablePauseIcon) tablePauseIcon.className = "fa-solid fa-pause";
+        if (tableStatus) tableStatus.innerText = "Mendengarkan Seluruh Peserta di Meja";
       }
     }
 
@@ -1104,6 +1656,9 @@
       if (mediaRecorder.state !== "inactive") {
         mediaRecorder.stop();
       }
+
+      stopAudioLevelMeter();
+      releaseWakeLock();
 
       // Update UI Selesai
       document.getElementById("record-status-label").innerText = "Selesai Merekam";
@@ -1118,7 +1673,7 @@
       document.getElementById("btn-pause-record").classList.add("text-white/50", "cursor-not-allowed");
       document.getElementById("btn-stop-record").disabled = true;
 
-      showToast("Perekaman audio selesai! Anda dapat mendengarkannya sebelum disimpan.", "success");
+      showToast("Perekaman audio selesai! Siap diproses menjadi notulen & visual note.", "success");
     }
 
     function resetAudioRecording() {
@@ -1126,6 +1681,8 @@
         mediaRecorder.stop();
       }
       clearInterval(recordInterval);
+      stopAudioLevelMeter();
+      releaseWakeLock();
       
       mediaRecorder = null;
       audioChunks = [];
@@ -1135,6 +1692,9 @@
       isRecordingPaused = false;
 
       document.getElementById("record-timer").innerText = "00:00:00";
+      const tableTimer = document.getElementById("table-mode-timer");
+      if (tableTimer) tableTimer.innerText = "00:00:00";
+
       document.getElementById("record-status-label").innerText = "Siap Merekam";
       document.getElementById("record-status-label").className = "text-xs font-semibold px-2 py-0.5 rounded bg-white/10 text-blue-200";
       document.getElementById("recording-pulse-dot").className = "w-5 h-5 rounded-full bg-slate-600 border-2 border-slate-500 flex items-center justify-center";
@@ -1145,12 +1705,60 @@
       document.getElementById("ai-transcript-box").classList.add("hidden");
       document.getElementById("ai-transcript-content").innerText = "";
 
+      const quickActionsEl = document.getElementById("ai-result-quick-actions");
+      if (quickActionsEl) quickActionsEl.classList.add("hidden");
+
       document.getElementById("btn-start-record").disabled = false;
       document.getElementById("btn-start-record").classList.remove("opacity-40", "cursor-not-allowed");
       document.getElementById("btn-pause-record").disabled = true;
       document.getElementById("btn-stop-record").disabled = true;
       document.getElementById("btn-reset-record").classList.add("hidden");
       document.getElementById("btn-pause-text").innerText = "Jeda";
+
+      const audioInputEl = document.getElementById("input-audio-file");
+      if (audioInputEl) audioInputEl.value = "";
+    }
+
+    function handleAudioFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const validAudioExtensions = /\.(webm|mp3|wav|m4a|aac|ogg|opus)$/i;
+      if (!file.type.startsWith("audio/") && !validAudioExtensions.test(file.name)) {
+        showToast("Format berkas audio tidak didukung. Harap pilih MP3, WAV, M4A, WEBM, atau OGG.", "error");
+        event.target.value = "";
+        return;
+      }
+
+      showToast(`Memuat berkas audio "${file.name}"...`, "info");
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        audioBase64 = e.target.result;
+        audioBlob = file;
+
+        // Tampilkan pemutar preview
+        const player = document.getElementById("audio-player");
+        player.src = URL.createObjectURL(file);
+
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        const metaEl = document.getElementById("audio-file-meta");
+        if (metaEl) {
+          metaEl.innerText = `Berkas: ${file.name} | Ukuran: ~${sizeMb} MB (Siap Diunggah & Diproses AI)`;
+        }
+
+        document.getElementById("audio-preview-container").classList.remove("hidden");
+        document.getElementById("btn-reset-record").classList.remove("hidden");
+
+        const recordStatus = document.getElementById("record-status-label");
+        if (recordStatus) {
+          recordStatus.innerText = "Audio Terunggah";
+          recordStatus.className = "text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/30 text-blue-200";
+        }
+
+        showToast(`Berkas audio "${file.name}" berhasil dimuat! Anda dapat merangkum dengan AI atau menyimpannya.`, "success");
+      };
+      reader.readAsDataURL(file);
     }
 
     function formatTimer(sec) {
@@ -1324,6 +1932,12 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           const tContent = document.getElementById("ai-transcript-content");
           tContent.innerText = resultJson.transkripLengkap;
           tBox.classList.remove("hidden");
+        }
+
+        // Tampilkan Kartu Cepat Visual Note & WhatsApp
+        const quickActions = document.getElementById("ai-result-quick-actions");
+        if (quickActions) {
+          quickActions.classList.remove("hidden");
         }
 
         // Scroll halus ke Section 2 agar pengguna langsung melihat hasilnya
@@ -1565,42 +2179,38 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         agenda: ""
       };
 
-      // 1. Judul / Hal / Perihal
+      // 1. Acara / Agenda Rapat terlebih dahulu
+      const acaraMatch = text.match(/(?:Acara|Agenda)\s*[:=]\s*([^\n\r]+(?:\n\s*[-0-9•*\u2022\u25cf\u25cb][^\n\r]+)*)/i);
+      if (acaraMatch && acaraMatch[1]) {
+        result.agenda = acaraMatch[1].replace(/^[.\s-]+/, "").trim();
+      }
+
+      // 2. Judul / Hal / Perihal
       const halMatch = text.match(/(?:Hal|Perihal)\s*[:=]\s*([^\n\r]+)/i);
       if (halMatch && halMatch[1]) {
         result.judul = halMatch[1].trim();
+      } else if (result.agenda && result.agenda.length > 5) {
+        // Jika ada agenda spesifik, gunakan sebagai judul yang representatif (hindari mencaplok seluruh surat)
+        result.judul = result.agenda.startsWith("Pembahasan") || result.agenda.startsWith("Rapat") 
+          ? result.agenda 
+          : `Rapat ${result.agenda}`;
       } else {
-        const judulAlt = text.match(/(?:Undangan|Rapat|Sosialisasi|Musyawarah|Koordinasi)\s+[^\n\r]+/i);
+        const judulAlt = text.match(/(?:Undangan|Rapat|Sosialisasi|Musyawarah|Koordinasi)\s+([^\n\r]+)/i);
         if (judulAlt) {
-          result.judul = judulAlt[0].trim();
+          let j = judulAlt[0].trim();
+          // Hentikan jika menabrak kata pembatas surat umum (Yth, Kepada, Nomor, di Tempat, dsb.)
+          const stopMatch = j.match(/^(.*?)(?=\s+(?:Yth|Kepada|Nomor|di\s+Tempat|Sehubungan|Dalam\s+rangka)\b)/i);
+          if (stopMatch && stopMatch[1].trim().length > 3) {
+            j = stopMatch[1].trim();
+          }
+          if (j.length > 100) {
+            j = j.substring(0, 100).trim();
+          }
+          result.judul = j;
         }
       }
 
-      // 2. Hari & Tanggal
-      const tglMatch = text.match(/(?:Hari\s*[\/,]\s*Tanggal|Tanggal|Hari)\s*[:=]\s*([^\n\r]+)/i);
-      let strTanggal = tglMatch ? tglMatch[1].trim() : "";
-
-      // 3. Waktu / Jam / Pukul
-      const waktuMatch = text.match(/(?:Waktu|Pukul|Jam)\s*[:=]\s*([^\n\r]+)/i);
-      let strWaktu = waktuMatch ? waktuMatch[1].trim() : "";
-
-      // Konversi tanggal & waktu menjadi format input datetime-local (YYYY-MM-DDTHH:MM)
-      const parsedDate = parseIndonesianDateTime(strTanggal, strWaktu);
-      if (parsedDate) {
-        result.tanggalIso = parsedDate;
-      }
-
-      // 4. Tempat / Lokasi Pertemuan
-      const tempatMatch = text.match(/(?:Tempat|Lokasi)\s*[:=]\s*([^\n\r]+)/i);
-      if (tempatMatch && tempatMatch[1]) {
-        result.tempat = tempatMatch[1].trim();
-      }
-
-      // 5. Acara / Agenda Rapat
-      const acaraMatch = text.match(/(?:Acara|Agenda)\s*[:=]\s*([^\n\r]+(?:\n\s*[-0-9•*][^\n\r]+)*)/i);
-      if (acaraMatch && acaraMatch[1]) {
-        result.agenda = acaraMatch[1].trim();
-      } else if (result.judul) {
+      if (!result.agenda && result.judul) {
         result.agenda = result.judul;
       }
 
@@ -1848,27 +2458,42 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           }
         }
 
-        // 1. Unggah Audio jika ada
+        // 1. Unggah Audio jika ada (Audio baru yang direkam atau diunggah)
         if (audioBase64) {
           btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah Rekaman Audio...</span>';
-          const audioFileName = `Rekaman_${sanitizeFilename(judulRapat)}_${Date.now()}.webm`;
+          
+          let audioMime = "audio/webm";
+          let ext = "webm";
+          if (audioBlob && audioBlob.type) {
+            audioMime = audioBlob.type;
+          } else if (audioBase64.indexOf(",") > -1) {
+            const header = audioBase64.split(",")[0];
+            const m = header.match(/data:([^;]+)/);
+            if (m) audioMime = m[1];
+          }
+          if (audioMime.includes("mp3") || audioMime.includes("mpeg")) ext = "mp3";
+          else if (audioMime.includes("wav")) ext = "wav";
+          else if (audioMime.includes("m4a") || audioMime.includes("mp4") || audioMime.includes("aac")) ext = "m4a";
+          else if (audioMime.includes("ogg")) ext = "ogg";
+
+          const audioFileName = `Rekaman_${sanitizeFilename(judulRapat)}_${Date.now()}.${ext}`;
           
           if (gasWebAppUrl) {
             const uploadAudioRes = await callGasApi({
               action: "upload_audio",
               base64Data: audioBase64,
               fileName: audioFileName,
-              mimeType: "audio/webm"
+              mimeType: audioMime
             });
             if (uploadAudioRes && uploadAudioRes.fileUrl) {
               urlAudio = uploadAudioRes.fileUrl;
             }
           } else {
-            urlAudio = "mock://drive.google.com/audio-demo.webm";
+            urlAudio = "mock://drive.google.com/audio-demo." + ext;
           }
         }
 
-        // 2. Unggah Dokumen jika ada
+        // 2. Unggah Dokumen jika ada (Lampiran baru yang dipilih)
         if (selectedFileBase64 && selectedFile) {
           btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah Lampiran Dokumen...</span>';
           const docFileName = `Lampiran_${sanitizeFilename(selectedFile.name)}`;
@@ -1888,7 +2513,63 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           }
         }
 
-        // 3. Simpan baris notulen ke Google Sheets
+        // 3. Simpan baris notulen ke Google Sheets (UPDATE atau CREATE)
+        if (editingMeetingId) {
+          btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Memperbarui Notulen...</span>';
+          
+          const updatePayload = {
+            id: editingMeetingId,
+            tanggal: formattedDate,
+            judulRapat: judulRapat,
+            pimpinanRapat: pimpinanRapat,
+            notulis: notulis,
+            peserta: peserta || "-",
+            agenda: agenda,
+            hasilKesepakatan: hasilKesepakatan,
+            tindakLanjut: tindakLanjut || "-",
+            urlAudio: urlAudio || editingMeetingAudioUrl,
+            urlLampiran: urlLampiran || editingMeetingLampiranUrl,
+            urlUndangan: urlUndangan || editingMeetingUndanganUrl,
+            tempat: tempat
+          };
+
+          if (gasWebAppUrl) {
+            const updateRes = await callGasApi({
+              action: "update",
+              id: editingMeetingId,
+              data: updatePayload
+            });
+
+            if (updateRes && updateRes.status === "success") {
+              showToast(`Notulen rapat ${editingMeetingId} berhasil diperbarui di Google Drive!`, "success");
+            } else {
+              throw new Error((updateRes && updateRes.message) || "Gagal memperbarui notulen.");
+            }
+          } else {
+            // Simpan ke Demo LocalStorage
+            let currentLocal = getLocalMeetings();
+            const idx = currentLocal.findIndex(m => m.id === editingMeetingId);
+            if (idx !== -1) {
+              currentLocal[idx] = {
+                ...currentLocal[idx],
+                ...updatePayload
+              };
+            } else {
+              currentLocal.unshift({
+                ...updatePayload,
+                waktuDibuat: new Date().toISOString()
+              });
+            }
+            saveLocalMeetings(currentLocal);
+            showToast("Perubahan notulen berhasil disimpan secara lokal (Mode Demo).", "success");
+          }
+
+          cancelEditMode();
+          switchTab("tab-list");
+          fetchMeetingsFromAPI();
+          return;
+        }
+
         btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan ke Spreadsheet...</span>';
         
         const meetingPayload = {
@@ -1953,6 +2634,10 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById("input-tanggal").value = now.toISOString().slice(0, 16);
+
+      if (editingMeetingId) {
+        cancelEditMode();
+      }
     }
 
     // ========================================================================
@@ -2059,42 +2744,77 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         const hasUndangan = meeting.urlUndangan && meeting.urlUndangan.trim() !== "";
 
         const card = document.createElement("div");
-        card.className = "bg-white rounded-xl border border-slate-200/90 hover:border-navy-400 p-5 shadow-sm hover:shadow-md transition-all duration-200 space-y-3.5";
+        card.className = "bg-white rounded-xl border border-slate-200/90 hover:border-navy-400 p-5 shadow-sm hover:shadow-md transition-all duration-200 space-y-3.5 relative";
 
         card.innerHTML = `
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-            <div>
-              <div class="flex items-center space-x-2">
+          <!-- Header Kartu: Identitas, Badge & Menu Titik Tiga (⋮) -->
+          <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+            <div class="flex-1 min-w-0 pr-1">
+              <div class="flex items-center space-x-2 flex-wrap gap-y-1">
                 <span class="text-xs font-mono font-bold text-navy-800 bg-navy-50 px-2.5 py-0.5 rounded border border-navy-100">${meeting.id}</span>
                 <span class="text-xs text-slate-500 flex items-center space-x-1">
                   <i class="fa-regular fa-calendar text-[11px]"></i>
-                  <span>${meeting.tanggal}</span>
+                  <span>${formatIndoShortDate(meeting.tanggal)}</span>
                 </span>
+                ${hasUndangan ? `
+                  <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200" title="Ada surat undangan tersimpan di Drive">
+                    <i class="fa-solid fa-envelope-open-text text-[9px]"></i>
+                    <span>Undangan</span>
+                  </span>
+                ` : ''}
+                ${hasAudio ? `
+                  <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Ada rekaman audio">
+                    <i class="fa-solid fa-microphone-lines text-[9px]"></i>
+                    <span>Audio</span>
+                  </span>
+                ` : ''}
+                ${hasLampiran ? `
+                  <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200" title="Ada lampiran berkas">
+                    <i class="fa-solid fa-paperclip text-[9px]"></i>
+                    <span>Lampiran</span>
+                  </span>
+                ` : ''}
               </div>
-              <h3 class="text-base font-bold text-slate-900 mt-1 hover:text-navy-800 cursor-pointer" onclick='openModalBeritaAcara(${JSON.stringify(meeting).replace(/'/g, "&apos;")})'>
-                ${meeting.judulRapat}
+              <h3 class="text-base font-bold text-slate-900 mt-1.5 hover:text-navy-800 cursor-pointer line-clamp-2 leading-snug" onclick='openModalBeritaAcara(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' title="${escapeHtml(meeting.judulRapat)}">
+                ${escapeHtml(meeting.judulRapat)}
               </h3>
             </div>
             
-            <div class="flex items-center space-x-2 self-start sm:self-auto">
-              ${hasUndangan ? `
-                <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200" title="Ada surat undangan tersimpan di Drive">
-                  <i class="fa-solid fa-envelope-open-text text-[10px]"></i>
-                  <span>Undangan</span>
-                </span>
-              ` : ''}
-              ${hasAudio ? `
-                <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Ada rekaman audio">
-                  <i class="fa-solid fa-microphone-lines text-[10px]"></i>
-                  <span>Audio</span>
-                </span>
-              ` : ''}
-              ${hasLampiran ? `
-                <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200" title="Ada lampiran berkas">
-                  <i class="fa-solid fa-paperclip text-[10px]"></i>
-                  <span>Lampiran</span>
-                </span>
-              ` : ''}
+            <!-- MENU TITIK TIGA (⋮) -->
+            <div class="relative flex-shrink-0">
+              <button type="button" data-dropdown-trigger="true" onclick="toggleCardDropdown('${meeting.id}', event)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-navy-50 text-slate-700 hover:text-navy-900 flex items-center justify-center transition border border-slate-200/80 shadow-xs cursor-pointer" title="Menu Opsi Titik Tiga (⋮)">
+                <i class="fa-solid fa-ellipsis-vertical text-base"></i>
+              </button>
+              
+              <!-- Dropdown Content -->
+              <div id="card-dropdown-${meeting.id}" class="card-dropdown-menu hidden absolute right-0 top-9 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 text-xs animate-in fade-in zoom-in-95">
+                <button type="button" onclick='closeAllCardDropdowns(); editMeeting(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-amber-50 text-slate-700 hover:text-amber-900 flex items-center space-x-2.5 font-semibold transition cursor-pointer">
+                  <i class="fa-solid fa-pen-to-square text-amber-600 w-4"></i>
+                  <span>Edit / Perbaiki Notulen</span>
+                </button>
+
+                <button type="button" onclick='closeAllCardDropdowns(); openModalVisualNote(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-purple-50 text-slate-700 hover:text-purple-900 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                  <i class="fa-solid fa-file-invoice text-purple-600 w-4"></i>
+                  <span>Visual Note (1 Halaman)</span>
+                </button>
+
+                <button type="button" onclick='closeAllCardDropdowns(); shareMeetingViaWhatsApp(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-emerald-50 text-slate-700 hover:text-emerald-900 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                  <i class="fa-brands fa-whatsapp text-emerald-600 w-4 text-sm"></i>
+                  <span>Kirim ke WhatsApp</span>
+                </button>
+
+                <button type="button" onclick='closeAllCardDropdowns(); openModalBeritaAcara(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-blue-50 text-slate-700 hover:text-navy-900 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                  <i class="fa-solid fa-print text-blue-600 w-4"></i>
+                  <span>Cetak Berita Acara</span>
+                </button>
+
+                <div class="border-t border-slate-100 my-1"></div>
+
+                <button type="button" onclick="closeAllCardDropdowns(); deleteMeeting('${meeting.id}')" class="w-full px-3.5 py-2 text-left hover:bg-red-50 text-red-600 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                  <i class="fa-solid fa-trash-can text-red-500 w-4"></i>
+                  <span>Hapus Notulen</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2137,15 +2857,63 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
               ` : ''}
             </div>
 
-            <div class="flex items-center space-x-1.5">
+            <div class="flex items-center space-x-1.5 flex-wrap gap-1">
+              <!-- Tombol Edit Notulen -->
+              <button onclick='editMeeting(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold flex items-center space-x-1.5 transition cursor-pointer" title="Perbaiki data rapat, unggah ulang rekaman audio atau berkas lampiran">
+                <i class="fa-solid fa-pen-to-square text-xs text-amber-600"></i>
+                <span>Edit</span>
+              </button>
+
+              <!-- Tombol Visual Note 1 Halaman -->
+              <button onclick='openModalVisualNote(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold flex items-center space-x-1.5 transition cursor-pointer" title="Lihat Visual Note 1 Halaman">
+                <i class="fa-solid fa-file-invoice text-xs text-purple-600"></i>
+                <span>Visual Note</span>
+              </button>
+
+              <!-- Tombol WhatsApp -->
+              <button onclick='shareMeetingViaWhatsApp(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center space-x-1 transition cursor-pointer" title="Kirim Ringkasan Rapat ke WhatsApp">
+                <i class="fa-brands fa-whatsapp text-sm text-emerald-600"></i>
+                <span class="hidden sm:inline">WhatsApp</span>
+              </button>
+
               <!-- Tombol Berita Acara (Cetak) -->
-              <button onclick='openModalBeritaAcara(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="px-3.5 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm transition">
-                <i class="fa-solid fa-file-invoice text-xs"></i>
+              <button onclick='openModalBeritaAcara(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm transition cursor-pointer" title="Cetak Berita Acara Formal">
+                <i class="fa-solid fa-print text-xs"></i>
                 <span>Berita Acara</span>
               </button>
 
+              <!-- Tombol Titik Tiga di Bilah Bawah -->
+              <div class="relative">
+                <button type="button" data-dropdown-trigger="true" onclick="toggleCardDropdown('${meeting.id}-bottom', event)" class="p-1.5 rounded-lg text-slate-500 hover:text-navy-900 hover:bg-slate-100 border border-slate-200 text-xs transition cursor-pointer" title="Menu Opsi Titik Tiga (⋮)">
+                  <i class="fa-solid fa-ellipsis-vertical px-1"></i>
+                </button>
+                <div id="card-dropdown-${meeting.id}-bottom" class="card-dropdown-menu hidden absolute right-0 bottom-9 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 text-xs animate-in fade-in zoom-in-95">
+                  <button type="button" onclick='closeAllCardDropdowns(); editMeeting(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-amber-50 text-slate-700 hover:text-amber-900 flex items-center space-x-2.5 font-semibold transition cursor-pointer">
+                    <i class="fa-solid fa-pen-to-square text-amber-600 w-4"></i>
+                    <span>Edit / Perbaiki Notulen</span>
+                  </button>
+                  <button type="button" onclick='closeAllCardDropdowns(); openModalVisualNote(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-purple-50 text-slate-700 hover:text-purple-900 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                    <i class="fa-solid fa-file-invoice text-purple-600 w-4"></i>
+                    <span>Visual Note (1 Halaman)</span>
+                  </button>
+                  <button type="button" onclick='closeAllCardDropdowns(); shareMeetingViaWhatsApp(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-emerald-50 text-slate-700 hover:text-emerald-900 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 w-4 text-sm"></i>
+                    <span>Kirim ke WhatsApp</span>
+                  </button>
+                  <button type="button" onclick='closeAllCardDropdowns(); openModalBeritaAcara(${JSON.stringify(meeting).replace(/'/g, "&apos;")})' class="w-full px-3.5 py-2 text-left hover:bg-blue-50 text-slate-700 hover:text-navy-900 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                    <i class="fa-solid fa-print text-blue-600 w-4"></i>
+                    <span>Cetak Berita Acara</span>
+                  </button>
+                  <div class="border-t border-slate-100 my-1"></div>
+                  <button type="button" onclick="closeAllCardDropdowns(); deleteMeeting('${meeting.id}')" class="w-full px-3.5 py-2 text-left hover:bg-red-50 text-red-600 flex items-center space-x-2.5 font-medium transition cursor-pointer">
+                    <i class="fa-solid fa-trash-can text-red-500 w-4"></i>
+                    <span>Hapus Notulen</span>
+                  </button>
+                </div>
+              </div>
+
               <!-- Tombol Hapus -->
-              <button onclick="deleteMeeting('${meeting.id}')" title="Hapus Notulen" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 text-xs transition">
+              <button onclick="deleteMeeting('${meeting.id}')" title="Hapus Notulen" class="px-2 py-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 text-xs transition cursor-pointer">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </div>
@@ -2238,6 +3006,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
     // MODAL FORMAT CETAK BERITA ACARA FORMAL
     // ========================================================================
     function openModalBeritaAcara(meeting) {
+      activeBeritaAcaraMeeting = meeting;
       document.getElementById("doc-id").innerText = meeting.id;
       document.getElementById("doc-hari-tanggal").innerText = formatIndoFullDate(meeting.tanggal);
       document.getElementById("doc-judul").innerText = meeting.judulRapat;
@@ -2433,6 +3202,22 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
     function formatIndoFullDate(dateStr) {
       if (!dateStr) return "-";
+      // Dukung format YYYY-MM-DD atau YYYY-MM-DDTHH:mm
+      if (dateStr.includes("-")) {
+        const cleanDate = dateStr.split("T")[0];
+        const parts = cleanDate.split("-");
+        if (parts.length === 3) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          const dateObj = new Date(y, m, d);
+          const hariList = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+          const bulanList = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+          const namaHari = hariList[dateObj.getDay()] || "";
+          const namaBulan = bulanList[m] || "";
+          return `${namaHari}, tanggal ${d} bulan ${namaBulan} tahun ${y}`;
+        }
+      }
       const parts = dateStr.split(" ")[0].split("/");
       if (parts.length === 3) {
         const d = parseInt(parts[0], 10);
@@ -2448,6 +3233,629 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         return `${namaHari}, tanggal ${d} bulan ${namaBulan} tahun ${y}`;
       }
       return dateStr;
+    }
+
+    function formatIndoShortDate(dateStr) {
+      if (!dateStr) return "-";
+      try {
+        const hariList = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const bulanList = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+        // 1. Format YYYY-MM-DD saja (tanpa komponen jam)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+          const parts = dateStr.trim().split("-");
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          const dt = new Date(y, m, d);
+          const hari = hariList[dt.getDay()];
+          const tgl = String(d).padStart(2, "0");
+          const bln = bulanList[m];
+          return `${hari}, ${tgl} ${bln} ${y}`;
+        }
+
+        // 2. Format ISO atau Date string lengkap
+        const dt = new Date(dateStr);
+        if (!isNaN(dt.getTime())) {
+          const hari = hariList[dt.getDay()];
+          const tgl = String(dt.getDate()).padStart(2, "0");
+          const bln = bulanList[dt.getMonth()];
+          const thn = dt.getFullYear();
+          const jam = String(dt.getHours()).padStart(2, "0");
+          const mnt = String(dt.getMinutes()).padStart(2, "0");
+
+          if (dateStr.includes("T") || dateStr.includes(":")) {
+            return `${hari}, ${tgl} ${bln} ${thn} • ${jam}:${mnt}`;
+          }
+          return `${hari}, ${tgl} ${bln} ${thn}`;
+        }
+      } catch (e) {
+        console.warn("Gagal format tanggal singkat:", e);
+      }
+      return dateStr;
+    }
+
+    // ========================================================================
+    // KONTROL DROPDOWN MENU KARTU RAPAT (TITIK TIGA ⋮)
+    // ========================================================================
+    function toggleCardDropdown(id, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const targetDropdown = document.getElementById(`card-dropdown-${id}`);
+      if (!targetDropdown) return;
+
+      const isCurrentlyOpen = !targetDropdown.classList.contains("hidden");
+      closeAllCardDropdowns();
+
+      if (!isCurrentlyOpen) {
+        targetDropdown.classList.remove("hidden");
+      }
+    }
+
+    function closeAllCardDropdowns() {
+      document.querySelectorAll(".card-dropdown-menu").forEach(menu => {
+        menu.classList.add("hidden");
+      });
+    }
+
+    // Event listener global untuk menutup dropdown kartu jika klik di luar
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".card-dropdown-menu") && !e.target.closest("[data-dropdown-trigger]")) {
+        closeAllCardDropdowns();
+      }
+    });
+
+    // ========================================================================
+    // MODUL KHUSUS RAPAT TATAP MUKA: WAKE LOCK, METER SUARA, & MODE MEJA
+    // ========================================================================
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+          updateWakeLockUI(true);
+          wakeLockSentinel.addEventListener('release', () => {
+            updateWakeLockUI(false);
+          });
+        }
+      } catch (err) {
+        console.warn("Screen Wake Lock tidak didukung browser atau ditolak OS:", err);
+        updateWakeLockUI(false);
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLockSentinel !== null) {
+        try {
+          wakeLockSentinel.release();
+        } catch (e) {}
+        wakeLockSentinel = null;
+        updateWakeLockUI(false);
+      }
+    }
+
+    function updateWakeLockUI(isActive) {
+      const badge = document.getElementById("wake-lock-badge");
+      if (badge) {
+        if (isActive) {
+          badge.classList.remove("hidden");
+          badge.classList.add("flex");
+        } else {
+          badge.classList.add("hidden");
+          badge.classList.remove("flex");
+        }
+      }
+    }
+
+    function setupAudioLevelMeter(stream) {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 256;
+        micSourceNode = audioCtx.createMediaStreamSource(stream);
+        micSourceNode.connect(analyserNode);
+
+        const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+        const sensitivityBox = document.getElementById("recorder-sensitivity-container");
+        if (sensitivityBox) {
+          sensitivityBox.classList.remove("hidden");
+          sensitivityBox.classList.add("flex");
+        }
+
+        const updateLevel = () => {
+          if (!analyserNode) return;
+          analyserNode.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const avg = sum / dataArray.length;
+          const percent = Math.min(100, Math.round((avg / 128) * 100));
+
+          const meterBar = document.getElementById("audio-level-meter-bar");
+          const tableMeterBar = document.getElementById("table-audio-level-bar");
+          if (meterBar) meterBar.style.width = percent + "%";
+          if (tableMeterBar) tableMeterBar.style.width = Math.max(10, percent) + "%";
+
+          const statusDesc = percent > 12 ? "Suara Ruangan Terdeteksi Jelas" : "Mendengarkan Meja Rapat...";
+          const meterText = document.getElementById("audio-level-text");
+          const tableMeterText = document.getElementById("table-audio-level-text");
+          if (meterText) meterText.innerText = "Sensitivitas Suara Meja: " + statusDesc;
+          if (tableMeterText) tableMeterText.innerText = statusDesc;
+
+          audioLevelAnimFrame = requestAnimationFrame(updateLevel);
+        };
+        updateLevel();
+      } catch (e) {
+        console.warn("Audio meter setup error:", e);
+      }
+    }
+
+    function stopAudioLevelMeter() {
+      if (audioLevelAnimFrame) {
+        cancelAnimationFrame(audioLevelAnimFrame);
+        audioLevelAnimFrame = null;
+      }
+      if (micSourceNode) {
+        try { micSourceNode.disconnect(); } catch (e) {}
+        micSourceNode = null;
+      }
+      if (analyserNode) {
+        try { analyserNode.disconnect(); } catch (e) {}
+        analyserNode = null;
+      }
+      if (audioCtx) {
+        try { audioCtx.close(); } catch (e) {}
+        audioCtx = null;
+      }
+      const sensitivityBox = document.getElementById("recorder-sensitivity-container");
+      if (sensitivityBox) {
+        sensitivityBox.classList.add("hidden");
+        sensitivityBox.classList.remove("flex");
+      }
+      const meterBar = document.getElementById("audio-level-meter-bar");
+      const tableMeterBar = document.getElementById("table-audio-level-bar");
+      if (meterBar) meterBar.style.width = "0%";
+      if (tableMeterBar) tableMeterBar.style.width = "0%";
+    }
+
+    function openTableMode() {
+      const judulInput = document.getElementById("input-judul").value;
+      const tableTitle = document.getElementById("table-mode-title");
+      if (tableTitle) {
+        tableTitle.innerText = (judulInput && judulInput.trim() !== "") ? judulInput.trim() : "Rapat Tatap Muka Sedang Berlangsung";
+      }
+      const modal = document.getElementById("modal-table-mode");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeTableMode() {
+      const modal = document.getElementById("modal-table-mode");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function finishAndProcessFromTableMode() {
+      closeTableMode();
+      stopAudioRecording();
+      // Otomatis picu Gemini AI transkripsi & rangkuman
+      setTimeout(() => {
+        transcribeAndSummarizeAudioWithAI();
+      }, 500);
+    }
+
+    function startQuickTableMeeting() {
+      switchTab("tab-create");
+      openTableMode();
+      if (!mediaRecorder || mediaRecorder.state === "inactive") {
+        startAudioRecording();
+      }
+    }
+
+    // ========================================================================
+    // MODUL DISTRIBUSI WHATSAPP & VISUAL NOTE 1 HALAMAN
+    // ========================================================================
+    function formatMeetingForWhatsApp(meeting) {
+      let waText = `📋 *NOTULENSI RAPAT TATAP MUKA*\n`;
+      waText += `───────────────────────\n`;
+      waText += `📌 *Agenda/Judul:* ${meeting.judulRapat || "-"}\n`;
+      waText += `🗓️ *Hari/Tanggal:* ${formatIndoFullDate(meeting.tanggal) || meeting.tanggal || "-"}\n`;
+      waText += `📍 *Tempat:* ${meeting.tempat || "-"}\n`;
+      waText += `👤 *Pimpinan Rapat:* ${meeting.pimpinanRapat || "-"}\n`;
+      waText += `✍️ *Notulis:* ${meeting.notulis || "-"}\n`;
+      if (meeting.peserta && meeting.peserta.trim() !== "") {
+        waText += `👥 *Peserta Hadir:* ${meeting.peserta}\n`;
+      }
+      waText += `\n🎯 *POIN KESEPAKATAN RESMI:*\n`;
+      waText += `${meeting.hasilKesepakatan || "-"}\n\n`;
+      waText += `⚡ *RENCANA AKSI & TINDAK LANJUT (PIC):*\n`;
+      waText += `${meeting.tindakLanjut || "-"}\n\n`;
+
+      if (meeting.urlAudio || meeting.urlLampiran || meeting.urlUndangan) {
+        waText += `📁 *ARSIP DIGITAL TERPADU:*\n`;
+        if (meeting.urlAudio) waText += `🎙️ Rekaman Audio Meja: ${meeting.urlAudio}\n`;
+        if (meeting.urlLampiran) waText += `📎 Berkas/Foto Absensi: ${meeting.urlLampiran}\n`;
+        if (meeting.urlUndangan) waText += `📩 Berkas Undangan: ${meeting.urlUndangan}\n`;
+        waText += `\n`;
+      }
+      waText += `───────────────────────\n`;
+      waText += `_Notulensi resmi via SI-NOTULEN Digital_`;
+      return waText;
+    }
+
+    function shareMeetingViaWhatsApp(meeting) {
+      const text = formatMeetingForWhatsApp(meeting);
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, "_blank");
+    }
+
+    function copyMeetingToWhatsApp(meeting) {
+      const text = formatMeetingForWhatsApp(meeting);
+      copyToClipboardWithFeedback(text);
+    }
+
+    function copyToClipboardWithFeedback(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("Rangkuman rapat format WhatsApp berhasil disalin ke clipboard!", "success");
+        }).catch(() => {
+          fallbackClipboardCopy(text);
+        });
+      } else {
+        fallbackClipboardCopy(text);
+      }
+    }
+
+    function fallbackClipboardCopy(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        showToast("Rangkuman rapat format WhatsApp berhasil disalin ke clipboard!", "success");
+      } catch (err) {
+        showToast("Gagal menyalin teks secara otomatis.", "error");
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function getCurrentFormMeetingObject() {
+      return {
+        id: "DRAFT-" + new Date().toISOString().slice(0, 10).replace(/-/g, ""),
+        judulRapat: document.getElementById("input-judul").value || "Rapat Tatap Muka",
+        tanggal: document.getElementById("input-tanggal").value || new Date().toISOString().slice(0, 16),
+        tempat: document.getElementById("input-tempat").value || "Ruang Rapat",
+        pimpinanRapat: document.getElementById("input-pimpinan").value || "-",
+        notulis: document.getElementById("input-notulis").value || "-",
+        peserta: document.getElementById("input-peserta").value || "-",
+        agenda: document.getElementById("input-agenda").value || "-",
+        hasilKesepakatan: document.getElementById("input-hasil").value || "Belum ada hasil kesepakatan.",
+        tindakLanjut: document.getElementById("input-tindaklanjut").value || "Belum ada tindak lanjut.",
+        urlAudio: "",
+        urlLampiran: "",
+        urlUndangan: ""
+      };
+    }
+
+    function openCurrentFormVisualNote() {
+      const meeting = getCurrentFormMeetingObject();
+      openModalVisualNote(meeting);
+    }
+
+    function shareCurrentFormWhatsApp() {
+      const meeting = getCurrentFormMeetingObject();
+      shareMeetingViaWhatsApp(meeting);
+    }
+
+    function copyCurrentFormWhatsApp() {
+      const meeting = getCurrentFormMeetingObject();
+      copyMeetingToWhatsApp(meeting);
+    }
+
+    function openModalVisualNote(meeting) {
+      currentActiveVisualNoteMeeting = meeting;
+
+      document.getElementById("vn-id").innerText = meeting.id || "NOT-DRAFT";
+      document.getElementById("vn-judul").innerText = meeting.judulRapat || "Notulensi Rapat Tatap Muka";
+      document.getElementById("vn-tempat").innerText = meeting.tempat || "Ruang Rapat";
+      document.getElementById("vn-tanggal").innerText = formatIndoFullDate(meeting.tanggal) || meeting.tanggal || "-";
+      document.getElementById("vn-pimpinan").innerText = meeting.pimpinanRapat || "-";
+      document.getElementById("vn-notulis").innerText = meeting.notulis || "-";
+      document.getElementById("vn-peserta").innerText = meeting.peserta || "Seluruh Peserta";
+      document.getElementById("vn-agenda").innerText = meeting.agenda || meeting.judulRapat || "-";
+      document.getElementById("vn-timestamp").innerText = "Dokumen Digital • " + (meeting.tanggal || new Date().toISOString().slice(0, 10));
+
+      // Poin Kesepakatan
+      const kesepakatanContainer = document.getElementById("vn-kesepakatan-list");
+      kesepakatanContainer.innerHTML = "";
+      const rawKesepakatan = meeting.hasilKesepakatan || "Belum ada poin kesepakatan tercatat.";
+      const kesepakatanItems = parseBulletPoints(rawKesepakatan);
+      if (kesepakatanItems.length === 0) {
+        kesepakatanContainer.innerHTML = `<p class="italic text-slate-400">Tidak ada poin kesepakatan tercatat.</p>`;
+      } else {
+        kesepakatanItems.forEach((item, idx) => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "flex items-start space-x-2 bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-xs";
+          itemEl.innerHTML = `
+            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">${idx + 1}</span>
+            <span class="text-xs text-slate-800 leading-snug">${escapeHtml(item)}</span>
+          `;
+          kesepakatanContainer.appendChild(itemEl);
+        });
+      }
+
+      // Tindak Lanjut
+      const tindakLanjutContainer = document.getElementById("vn-tindaklanjut-list");
+      tindakLanjutContainer.innerHTML = "";
+      const rawTindakLanjut = meeting.tindakLanjut || "Belum ada rencana tindak lanjut tercatat.";
+      const tindakLanjutItems = parseBulletPoints(rawTindakLanjut);
+      if (tindakLanjutItems.length === 0) {
+        tindakLanjutContainer.innerHTML = `<p class="italic text-slate-400">Tidak ada rencana tindak lanjut tercatat.</p>`;
+      } else {
+        tindakLanjutItems.forEach((item, idx) => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "flex items-start space-x-2 bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-xs";
+          itemEl.innerHTML = `
+            <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">${idx + 1}</span>
+            <span class="text-xs text-slate-800 leading-snug">${escapeHtml(item)}</span>
+          `;
+          tindakLanjutContainer.appendChild(itemEl);
+        });
+      }
+
+      const modal = document.getElementById("modal-visual-note");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeModalVisualNote() {
+      const modal = document.getElementById("modal-visual-note");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function shareActiveVisualNoteWhatsApp() {
+      if (currentActiveVisualNoteMeeting) {
+        shareMeetingViaWhatsApp(currentActiveVisualNoteMeeting);
+      }
+    }
+
+    function copyActiveVisualNoteWhatsApp() {
+      if (currentActiveVisualNoteMeeting) {
+        copyMeetingToWhatsApp(currentActiveVisualNoteMeeting);
+      }
+    }
+
+    function printVisualNote() {
+      document.body.classList.add("print-visual-note-mode");
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove("print-visual-note-mode");
+      }, 1000);
+    }
+
+    function parseBulletPoints(text) {
+      if (!text) return [];
+      return text
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => line.replace(/^(\d+[\.\)]|[-*•\u2022\u25cf\u25cb])\s*/, "").trim())
+        .filter(line => line.length > 0);
+    }
+
+    function previewSampleVisualNote() {
+      if (meetingsList && meetingsList.length > 0) {
+        openModalVisualNote(meetingsList[0]);
+      } else {
+        // Dummy preview contoh
+        openModalVisualNote({
+          id: "NOT-20261030-CONTOH",
+          judulRapat: "Rapat Koordinasi Evaluasi Program Kerja & Anggaran",
+          tanggal: "30/10/2026 09:30",
+          tempat: "Ruang Rapat Utama Lt. 2",
+          pimpinanRapat: "Dr. Ir. Hendra Gunawan, M.M.",
+          notulis: "Anita Wijaya, S.Kom.",
+          peserta: "Daftar Terlampir (15 Pejabat & Staff)",
+          agenda: "1. Evaluasi capaian target bulan berjalan\n2. Realisasi anggaran operasional\n3. Penyiapan pengadaan infrastruktur baru",
+          hasilKesepakatan: "1. Target capaian program disetujui untuk dipercepat per akhir bulan depan.\n2. Alokasi anggaran dialihkan 15% untuk pembaruan sistem teknologi informasi.\n3. Rapat evaluasi lanjutan dijadwalkan setiap hari Senin minggu pertama.",
+          tindakLanjut: "1. Penyusunan revisi anggaran teknis (PIC: Divisi Keuangan, Deadline: 7 November 2026)\n2. Pengajuan spesifikasi perangkat lunak notulensi (PIC: Tim IT, Deadline: 10 November 2026)\n3. Distribusi risalah rapat resmi ke pimpinan (PIC: Notulis, Deadline: 31 Oktober 2026)"
+        });
+      }
+    }
+
+    function shareLatestMeetingWhatsApp() {
+      if (meetingsList && meetingsList.length > 0) {
+        shareMeetingViaWhatsApp(meetingsList[0]);
+      } else {
+        shareMeetingViaWhatsApp(getCurrentFormMeetingObject());
+      }
+    }
+
+    // ========================================================================
+    // MODUL EDIT & PEMBARUAN NOTULEN RAPAT
+    // ========================================================================
+    function editMeeting(meeting) {
+      if (!meeting) return;
+      editingMeetingId = meeting.id;
+      editingMeetingAudioUrl = meeting.urlAudio || "";
+      editingMeetingLampiranUrl = meeting.urlLampiran || "";
+      editingMeetingUndanganUrl = meeting.urlUndangan || "";
+
+      // Reset file input baru
+      selectedFile = null;
+      selectedFileBase64 = null;
+      selectedUndanganFile = null;
+      selectedUndanganBase64 = null;
+      audioBlob = null;
+      audioBase64 = null;
+
+      // Pindah ke tab formulir
+      switchTab("tab-create");
+
+      // Tampilkan Edit Mode Banner
+      const banner = document.getElementById("edit-mode-banner");
+      if (banner) {
+        banner.classList.remove("hidden");
+        const badgeId = document.getElementById("edit-mode-badge-id");
+        if (badgeId) badgeId.innerText = meeting.id;
+      }
+
+      // Ubah teks nav tab
+      const navBtnCreateText = document.querySelector("#nav-btn-create span");
+      if (navBtnCreateText) navBtnCreateText.innerText = "Edit Notulen (" + meeting.id + ")";
+
+      // Isi input form
+      document.getElementById("input-judul").value = meeting.judulRapat || "";
+      document.getElementById("input-tanggal").value = parseTanggalToDatetimeInput(meeting.tanggal);
+      document.getElementById("input-tempat").value = meeting.tempat || "";
+      document.getElementById("input-pimpinan").value = meeting.pimpinanRapat || "";
+      document.getElementById("input-notulis").value = meeting.notulis || "";
+      document.getElementById("input-peserta").value = meeting.peserta || "";
+      document.getElementById("input-agenda").value = meeting.agenda || "";
+      document.getElementById("input-hasil").value = meeting.hasilKesepakatan || "";
+      document.getElementById("input-tindaklanjut").value = meeting.tindakLanjut || "";
+
+      // 1. Tampilkan Undangan Tersimpan jika ada
+      const existingUndanganCard = document.getElementById("existing-undangan-card");
+      const existingUndanganLink = document.getElementById("existing-undangan-link");
+      if (editingMeetingUndanganUrl && editingMeetingUndanganUrl.trim() !== "") {
+        if (existingUndanganCard) existingUndanganCard.classList.remove("hidden");
+        if (existingUndanganLink) existingUndanganLink.href = editingMeetingUndanganUrl;
+      } else {
+        if (existingUndanganCard) existingUndanganCard.classList.add("hidden");
+      }
+
+      // 2. Tampilkan Rekaman Audio Tersimpan jika ada
+      const existingAudioCard = document.getElementById("existing-audio-card");
+      const existingAudioLink = document.getElementById("existing-audio-link");
+      if (editingMeetingAudioUrl && editingMeetingAudioUrl.trim() !== "") {
+        if (existingAudioCard) existingAudioCard.classList.remove("hidden");
+        if (existingAudioLink) existingAudioLink.href = editingMeetingAudioUrl;
+      } else {
+        if (existingAudioCard) existingAudioCard.classList.add("hidden");
+      }
+
+      // Sembunyikan preview baru audio dan preview baru berkas
+      document.getElementById("audio-preview-container").classList.add("hidden");
+      document.getElementById("audio-player").src = "";
+      document.getElementById("file-preview-card").classList.add("hidden");
+      document.getElementById("undangan-detected-card").classList.add("hidden");
+
+      // 3. Tampilkan Lampiran Tersimpan jika ada
+      const existingLampiranCard = document.getElementById("existing-lampiran-card");
+      const existingLampiranLink = document.getElementById("existing-lampiran-link");
+      if (editingMeetingLampiranUrl && editingMeetingLampiranUrl.trim() !== "") {
+        if (existingLampiranCard) existingLampiranCard.classList.remove("hidden");
+        if (existingLampiranLink) existingLampiranLink.href = editingMeetingLampiranUrl;
+      } else {
+        if (existingLampiranCard) existingLampiranCard.classList.add("hidden");
+      }
+
+      // Perbarui Tombol Submit Form
+      const btnSubmit = document.getElementById("btn-submit-form");
+      if (btnSubmit) {
+        btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i><span>Perbarui Notulen di Drive (Update)</span>';
+        btnSubmit.className = "w-full sm:w-auto px-7 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold shadow-lg shadow-amber-600/20 hover:shadow-amber-600/30 transition flex items-center justify-center space-x-2 cursor-pointer";
+      }
+
+      // Tampilkan Tombol Batal Edit
+      const btnCancelEdit = document.getElementById("btn-cancel-edit-form");
+      if (btnCancelEdit) btnCancelEdit.classList.remove("hidden");
+
+      // Scroll ke form
+      document.getElementById("form-notulen").scrollIntoView({ behavior: "smooth", block: "start" });
+      showToast(`Mode edit aktif untuk Notulen ${meeting.id}. Anda dapat memperbaiki isi atau mengunggah ulang rekaman & berkas.`, "info");
+    }
+
+    function cancelEditMode() {
+      editingMeetingId = null;
+      editingMeetingAudioUrl = "";
+      editingMeetingLampiranUrl = "";
+      editingMeetingUndanganUrl = "";
+
+      const banner = document.getElementById("edit-mode-banner");
+      if (banner) banner.classList.add("hidden");
+
+      const existingUndanganCard = document.getElementById("existing-undangan-card");
+      if (existingUndanganCard) existingUndanganCard.classList.add("hidden");
+
+      const existingAudioCard = document.getElementById("existing-audio-card");
+      if (existingAudioCard) existingAudioCard.classList.add("hidden");
+
+      const existingLampiranCard = document.getElementById("existing-lampiran-card");
+      if (existingLampiranCard) existingLampiranCard.classList.add("hidden");
+
+      const navBtnCreateText = document.querySelector("#nav-btn-create span");
+      if (navBtnCreateText) navBtnCreateText.innerText = "Buat Notulen Baru";
+
+      const btnSubmit = document.getElementById("btn-submit-form");
+      if (btnSubmit) {
+        btnSubmit.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>Simpan Notulen ke Google Drive</span>';
+        btnSubmit.className = "w-full sm:w-auto px-7 py-3 rounded-xl bg-navy-800 hover:bg-navy-900 text-white text-sm font-bold shadow-lg shadow-navy-800/20 hover:shadow-navy-800/30 transition flex items-center justify-center space-x-2 cursor-pointer";
+      }
+
+      const btnCancelEdit = document.getElementById("btn-cancel-edit-form");
+      if (btnCancelEdit) btnCancelEdit.classList.add("hidden");
+    }
+
+    function editFromModalBeritaAcara() {
+      if (activeBeritaAcaraMeeting) {
+        closeModalBeritaAcara();
+        editMeeting(activeBeritaAcaraMeeting);
+      }
+    }
+
+    function editFromModalVisualNote() {
+      if (currentActiveVisualNoteMeeting) {
+        closeModalVisualNote();
+        editMeeting(currentActiveVisualNoteMeeting);
+      }
+    }
+
+    function parseTanggalToDatetimeInput(dateStr) {
+      if (!dateStr) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        return now.toISOString().slice(0, 16);
+      }
+      if (dateStr.includes("T") && dateStr.length >= 16) {
+        return dateStr.slice(0, 16);
+      }
+      if (dateStr.includes("-")) {
+        const parts = dateStr.trim().split(" ");
+        const ymd = parts[0];
+        const time = (parts[1] && parts[1].length >= 5) ? parts[1].slice(0, 5) : "09:00";
+        return `${ymd}T${time}`;
+      }
+      if (dateStr.includes("/")) {
+        const parts = dateStr.trim().split(" ");
+        const dmy = parts[0].split("/");
+        if (dmy.length === 3) {
+          const day = String(dmy[0]).padStart(2, "0");
+          const month = String(dmy[1]).padStart(2, "0");
+          const year = dmy[2];
+          const time = (parts[1] && parts[1].length >= 5) ? parts[1].slice(0, 5) : "09:00";
+          return `${year}-${month}-${day}T${time}`;
+        }
+      }
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      return now.toISOString().slice(0, 16);
     }
   </script>
 </body>

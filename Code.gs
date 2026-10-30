@@ -361,7 +361,87 @@ function doPost(e) {
       });
     }
 
-    // 5. ACTION: HAPUS NOTULEN (DELETE)
+    // 6. ACTION: PERBARUI / EDIT NOTULEN (UPDATE)
+    if (action === "update") {
+      const meetingData = payload.data;
+      const targetId = payload.id || (meetingData && meetingData.id);
+      if (!targetId) {
+        throw new Error("Parameter 'id' wajib disertakan untuk pembaruan data.");
+      }
+      if (!meetingData) {
+        throw new Error("Parameter data rapat tidak ditemukan.");
+      }
+
+      const sheet = resources.sheet;
+      const lastRow = sheet.getLastRow();
+      if (lastRow <= 1) {
+        return createJsonResponse({
+          status: "error",
+          message: "Database kosong."
+        });
+      }
+
+      const idRange = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      let rowIndexToUpdate = -1;
+
+      for (let i = 0; i < idRange.length; i++) {
+        if (String(idRange[i][0]).trim() === String(targetId).trim()) {
+          rowIndexToUpdate = i + 2; // offset baris header
+          break;
+        }
+      }
+
+      if (rowIndexToUpdate === -1) {
+        return createJsonResponse({
+          status: "error",
+          message: "Data notulen dengan ID " + targetId + " tidak ditemukan."
+        });
+      }
+
+      // Ambil nilai lama agar kolom yang tidak diperbarui tidak terhapus
+      const currentRow = sheet.getRange(rowIndexToUpdate, 1, 1, TABLE_HEADERS.length).getValues()[0];
+
+      const updatedRow = [
+        targetId,
+        meetingData.tanggal !== undefined ? meetingData.tanggal : currentRow[1],
+        meetingData.judulRapat !== undefined ? meetingData.judulRapat : currentRow[2],
+        meetingData.pimpinanRapat !== undefined ? meetingData.pimpinanRapat : currentRow[3],
+        meetingData.notulis !== undefined ? meetingData.notulis : currentRow[4],
+        meetingData.peserta !== undefined ? meetingData.peserta : currentRow[5],
+        meetingData.agenda !== undefined ? meetingData.agenda : currentRow[6],
+        meetingData.hasilKesepakatan !== undefined ? meetingData.hasilKesepakatan : currentRow[7],
+        meetingData.tindakLanjut !== undefined ? meetingData.tindakLanjut : currentRow[8],
+        meetingData.urlAudio !== undefined && meetingData.urlAudio !== "" ? meetingData.urlAudio : currentRow[9],
+        meetingData.urlLampiran !== undefined && meetingData.urlLampiran !== "" ? meetingData.urlLampiran : currentRow[10],
+        currentRow[11] || new Date().toISOString(), // Waktu_Dibuat asli dipertahankan
+        meetingData.urlUndangan !== undefined && meetingData.urlUndangan !== "" ? meetingData.urlUndangan : (currentRow[12] || "")
+      ];
+
+      sheet.getRange(rowIndexToUpdate, 1, 1, TABLE_HEADERS.length).setValues([updatedRow]);
+
+      return createJsonResponse({
+        status: "success",
+        message: "Data notulen dengan ID " + targetId + " berhasil diperbarui di database.",
+        id: targetId,
+        data: {
+          id: targetId,
+          tanggal: updatedRow[1],
+          judulRapat: updatedRow[2],
+          pimpinanRapat: updatedRow[3],
+          notulis: updatedRow[4],
+          peserta: updatedRow[5],
+          agenda: updatedRow[6],
+          hasilKesepakatan: updatedRow[7],
+          tindakLanjut: updatedRow[8],
+          urlAudio: updatedRow[9],
+          urlLampiran: updatedRow[10],
+          waktuDibuat: updatedRow[11],
+          urlUndangan: updatedRow[12]
+        }
+      });
+    }
+
+    // 7. ACTION: HAPUS NOTULEN (DELETE)
     if (action === "delete") {
       const targetId = payload.id;
       if (!targetId) {

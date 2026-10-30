@@ -18,20 +18,30 @@ Aplikasi web modern untuk manajemen notulensi dan berita acara rapat dinas/organ
    - Pengguna dapat mengunggah berkas surat undangan rapat resmi (format PDF, foto/scan JPG/PNG, maupun Word).
    - Sistem secara cerdas membaca dan mengekstrak: **Judul/Perihal Rapat, Hari & Tanggal, Jam/Waktu, Tempat Pelaksanaan, Pimpinan Rapat, Daftar Peserta, dan Agenda Pembahasan**.
    - Kolom formulir akan otomatis terisi secara instan, dan berkas fisik undangan otomatis diarsipkan ke subfolder Google Drive `Surat_Undangan`.
-3. **Perekam Suara Rapat & Rangkuman AI Otomatis (Google Gemini AI)**:
-   - Merekam jalannya rapat secara langsung (MediaRecorder API) dengan timer digital dan animasi gelombang audio.
-   - Dilengkapi tombol ✨ **"Transkrip & Rangkum dengan AI"**: Google Gemini AI akan langsung mendengarkan rekaman audio rapat dan secara cerdas menyusun:
-     * **Hasil Kesepakatan / Risalah Rapat** (Poin-poin keputusan resmi).
-     * **Tindak Lanjut / Action Plan** (Daftar rencana aksi, PIC, dan batas waktu/deadline).
-     * **Transkrip Lengkap Percakapan** (Dapat ditinjau langsung di dalam aplikasi).
-   - Berkas rekaman audio (.webm HD) otomatis diarsipkan ke subfolder Google Drive `Rekaman_Audio`.
-4. **Dikte Langsung Suara ke Teks (Web Speech API)**:
+3. **Alur Kerja Khusus Rapat Tatap Muka & Mode Meja Rapat**:
+   - **Langkah 1 (Taruh di Meja & Rekam)**: Cukup letakkan smartphone/laptop di tengah meja rapat. Dilengkapi fitur *Screen Wake Lock* (layar dijaga tetap menyala tanpa mati/terkunci otomatis), visualisator sensitivitas suara sekeliling meja (*Web Audio API*), dan tombol *Layar Meja* (tampilan OLED layar penuh dengan stopwatch raksasa).
+   - **Langkah 2 (Dapatkan Catatan Rapat)**: Google Gemini AI secara otomatis mendengarkan rekaman audio ruangan dan menyusun:
+     * **Poin Kesepakatan Resmi** (Poin-poin keputusan akhir yang disepakati bersama).
+     * **Matriks Tindak Lanjut / Action Plan** (PIC penanggung jawab dan batas waktu/deadline).
+     * **Visual Note 1 Halaman (*One-Pager Summary*)**: Ringkasan eksekutif visual padat yang siap ditinjau pimpinan dalam 1 menit.
+     * **Transkrip Lengkap Percakapan** (Catatan kronologis diskusi ruangan).
+   - **Langkah 3 (Selesaikan Tindak Lanjut & Distribusi)**: 
+     * Ekspor Berita Acara Formal siap cetak/tanda tangan (PDF).
+     * Sinkronisasi data ke Google Sheets untuk monitoring progres tugas.
+     * Sekali klik kirim rangkuman rapat berformat rapi langsung ke WhatsApp peserta rapat.
+4. **Mode Edit Notulen & Unggah Berkas/Audio Bebas**:
+   - Dilengkapi tombol **Edit** pada setiap kartu rapat di daftar, serta pada pratinjau Berita Acara dan Visual Note 1 Halaman.
+   - Pengguna dapat leluasa memperbaiki kesalahan ketik pada agenda, hasil kesepakatan, pimpinan, maupun notulis.
+   - **Unggah Berkas Rekaman Audio Fleksibel**: Pengguna tidak hanya bisa merekam langsung lewat mikrofon, namun kini dapat mengunggah file rekaman audio eksternal (`.mp3`, `.wav`, `.m4a`, `.webm`, `.ogg`) yang kemudian dapat diproses ulang oleh Gemini AI dan diunggah ke Google Drive.
+   - Berkas lampiran dan surat undangan lama tetap terlindungi dan dapat diganti kapan saja dengan file baru.
+5. **Dikte Langsung Suara ke Teks (Web Speech API)**:
    - Cukup klik tombol mikrofon pada kolom **Agenda**, **Hasil Kesepakatan**, atau **Tindak Lanjut** dan bicaralah dalam Bahasa Indonesia.
    - Kata-kata yang diucapkan akan langsung terketik otomatis secara *real-time*.
-5. **Format Cetak Berita Acara Resmi**:
+6. **Format Cetak Berita Acara Resmi & Visual Note 1 Halaman**:
    - Menghasilkan lembar dokumen resmi standar Berita Acara (Kop instansi, nomor berita acara, waktu/tempat, pimpinan rapat, daftar hadir, risalah, serta kolom tanda tangan pimpinan dan notulis).
+   - Menghasilkan lembar ringkasan eksekutif **Visual Note 1 Halaman** untuk laporan pimpinan dan arsip cepat.
    - Dilengkapi tombol cetak langsung atau simpan ke file PDF (*Print to PDF*).
-6. **UI/UX Elegan & Responsif**:
+7. **UI/UX Elegan & Responsif**:
    - Desain formal bernuansa *Deep Royal Navy Blue* (`#1E3A8A`), putih, dan abu-abu terang.
    - Ramah perangkat desktop, tablet, maupun smartphone (*mobile-friendly*).
    - Pengaturan URL Web App fleksibel melalui modal konfigurasi dengan fitur uji koneksi instan.
