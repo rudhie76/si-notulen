@@ -693,7 +693,7 @@
               </label>
               <div class="flex items-center space-x-2">
                 <!-- AI Summarize from Audio Button -->
-                <button type="button" onclick="transcribeAndSummarizeAudioWithAI()" class="inline-flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors cursor-pointer" title="Rangkum otomatis dari rekaman audio rapat menggunakan Gemini AI">
+                <button type="button" onclick="transcribeAndSummarizeAudioWithAI(true)" class="inline-flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors cursor-pointer" title="Rangkum otomatis dari rekaman audio rapat menggunakan Gemini AI">
                   <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-xs"></i>
                   <span>Rangkum dari Audio (AI)</span>
                 </button>
@@ -866,7 +866,7 @@
                 <i class="fa-solid fa-wand-magic-sparkles text-amber-300 flex-shrink-0"></i>
                 <span>Ingin hasil rapat otomatis? Biarkan AI mendengarkan rekaman dan mengisi hasil kesepakatan & tindak lanjut.</span>
               </div>
-              <button type="button" id="btn-ai-summarize" onclick="transcribeAndSummarizeAudioWithAI()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-purple-900/40 transition flex items-center justify-center space-x-2 cursor-pointer flex-shrink-0">
+              <button type="button" id="btn-ai-summarize" onclick="transcribeAndSummarizeAudioWithAI(true)" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-purple-900/40 transition flex items-center justify-center space-x-2 cursor-pointer flex-shrink-0">
                 <i class="fa-solid fa-brain text-amber-300"></i>
                 <span>Transkrip & Rangkum dengan AI</span>
               </button>
@@ -1217,7 +1217,7 @@
         <div class="border-t border-slate-100 pt-3">
           <div class="flex items-center justify-between mb-1.5">
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Google Gemini AI API Key (Untuk Transkripsi & Rangkuman Audio)
+              Google Gemini AI API Key <span class="text-xs font-normal text-slate-400 lowercase">(opsional)</span>
             </label>
             <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[11px] text-blue-600 hover:text-blue-800 hover:underline flex items-center space-x-1 font-semibold">
               <span>Dapatkan Kunci Gratis</span>
@@ -1225,12 +1225,12 @@
             </a>
           </div>
           <div class="relative">
-            <input type="password" id="setting-gemini-key" placeholder="AIzaSy..." class="w-full pl-3.5 pr-10 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-purple-600/30 focus:border-purple-600">
+            <input type="password" id="setting-gemini-key" placeholder="AIzaSy... (kosongkan jika tidak dipakai)" class="w-full pl-3.5 pr-10 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-purple-600/30 focus:border-purple-600">
             <button type="button" onclick="togglePasswordVisibility('setting-gemini-key', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer">
               <i class="fa-solid fa-eye"></i>
             </button>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Digunakan untuk mendengarkan rekaman rapat dan menyusun otomatis <strong>Hasil Kesepakatan</strong> dan <strong>Tindak Lanjut</strong>. Disimpan secara lokal di browser Anda.</p>
+          <p class="text-[11px] text-slate-500 mt-1"><span class="font-bold text-emerald-700">Opsional:</span> Hanya digunakan untuk merangkum risalah otomatis dengan AI. Seluruh rekaman suara dan notulen rapat <strong>tetap tersimpan dan diunggah ke Google Drive tanpa meminta API Key ini</strong>.</p>
         </div>
 
         <div id="test-connection-result" class="hidden p-3 rounded-xl text-xs font-medium"></div>
@@ -1320,7 +1320,7 @@
 
       <p class="text-xs text-slate-400 max-w-md">
         <i class="fa-solid fa-circle-info text-blue-400 mr-1"></i>
-        Bicara secara alami di meja rapat. Setelah agenda selesai, tekan tombol <strong>Selesai & Susun Notulen AI</strong>.
+        Bicara secara alami di meja rapat. Setelah agenda selesai, tekan tombol <strong>Selesai & Simpan Rekaman</strong>.
       </p>
 
     </div>
@@ -1333,10 +1333,10 @@
         <span id="table-btn-pause-text">Jeda Rapat</span>
       </button>
 
-      <!-- Selesai & AI Process -->
-      <button type="button" onclick="finishAndProcessFromTableMode()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-black text-sm shadow-xl shadow-emerald-900/50 transition flex items-center space-x-2 transform hover:scale-105">
-        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
-        <span>Selesai & Susun Notulen AI</span>
+      <!-- Selesai & Simpan Rekaman -->
+      <button type="button" onclick="finishAndProcessFromTableMode()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-black text-sm shadow-xl shadow-emerald-900/50 transition flex items-center space-x-2 transform hover:scale-105 cursor-pointer">
+        <i class="fa-solid fa-circle-check text-white"></i>
+        <span>Selesai & Simpan Rekaman</span>
       </button>
     </div>
 
@@ -1497,23 +1497,31 @@
     const STORAGE_KEY_GEMINI_KEY = "si_notulen_gemini_api_key";
     const STORAGE_KEY_LOCAL_DB = "si_notulen_local_demo_db";
 
-    let geminiApiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY) || "";
-
     // 1. Cek injeksi URL otomatis jika dijalankan langsung di Google Apps Script (HtmlService)
     const injectedUrl = "<?= typeof gasWebAppUrl !== 'undefined' ? gasWebAppUrl : '' ?>";
     if (injectedUrl && injectedUrl.startsWith("http")) {
       localStorage.setItem(STORAGE_KEY_GAS_URL, injectedUrl);
     }
 
-    // 2. Auto-deteksi URL dari parameter query browser (?gas=... atau ?api=... atau ?url=...)
+    // 2. Auto-deteksi URL & Gemini Key dari parameter query browser (?gas=... ?gemini=... atau ?key=...)
     const urlParams = new URLSearchParams(window.location.search);
     const queryGasUrl = urlParams.get("gas") || urlParams.get("api") || urlParams.get("url");
     if (queryGasUrl && queryGasUrl.trim() !== "") {
       localStorage.setItem(STORAGE_KEY_GAS_URL, queryGasUrl.trim());
+    }
+
+    const queryGeminiKey = urlParams.get("gemini") || urlParams.get("key");
+    if (queryGeminiKey && queryGeminiKey.trim() !== "") {
+      localStorage.setItem(STORAGE_KEY_GEMINI_KEY, queryGeminiKey.trim());
+    }
+
+    if (queryGasUrl || queryGeminiKey) {
       // Bersihkan query string dari address bar agar URL tetap rapi
       const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
       window.history.replaceState({ path: cleanUrl }, "", cleanUrl);
     }
+
+    let geminiApiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY) || "";
 
     // Pastikan jika localStorage kosong atau bernilai lama, default ke DEFAULT_GAS_URL resmi
     let savedStoredUrl = localStorage.getItem(STORAGE_KEY_GAS_URL);
@@ -1887,25 +1895,21 @@
     // ========================================================================
     // MODUL AI TRANSKRIPSI & PERANGKUM NOTULEN DARI REKAMAN AUDIO (GEMINI AI)
     // ========================================================================
-    async function transcribeAndSummarizeAudioWithAI() {
+    async function transcribeAndSummarizeAudioWithAI(isManual = false) {
       if (!audioBase64) {
-        showToast("Belum ada rekaman audio rapat. Silakan rekam suara rapat terlebih dahulu.", "info");
+        if (isManual) {
+          showToast("Belum ada rekaman audio rapat. Silakan rekam suara rapat terlebih dahulu.", "info");
+        }
         return;
       }
 
       if (!geminiApiKey || geminiApiKey.trim() === "") {
-        const inputKey = prompt(
-          "Untuk menggunakan fitur AI Transkripsi & Rangkuman Otomatis, silakan masukkan Google Gemini API Key Anda:\n(Dapatkan Kunci Gratis tanpa kartu kredit di https://aistudio.google.com/app/apikey)",
-          ""
-        );
-        if (inputKey && inputKey.trim() !== "") {
-          geminiApiKey = inputKey.trim();
-          localStorage.setItem(STORAGE_KEY_GEMINI_KEY, geminiApiKey);
-        } else {
-          showToast("Gemini API Key diperlukan untuk memproses audio dengan AI.", "info");
+        if (isManual) {
+          showToast("Fitur AI Opsional: Masukkan Gemini API Key di Pengaturan jika ingin analisis otomatis.", "info");
           openSettingsModal();
-          return;
         }
+        // Jika dipicu otomatis, tidak perlu memunculkan dialog prompt atau mengganggu pengguna
+        return;
       }
 
       const btn = document.getElementById("btn-ai-summarize");
@@ -2063,11 +2067,11 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
       } catch (err) {
         console.error("Kesalahan AI Gemini:", err);
-        let errorMsg = err.message;
-        if (errorMsg.includes("API_KEY_INVALID") || errorMsg.includes("API key not valid")) {
-          errorMsg = "API Key Gemini tidak valid. Silakan periksa kembali di menu Pengaturan.";
+        let errorMsg = err.message || "";
+        if (errorMsg.includes("API_KEY_INVALID") || errorMsg.includes("API key not valid") || errorMsg.includes("API_KEY_SERVICE_BLOCKED") || errorMsg.includes("PERMISSION_DENIED")) {
+          errorMsg = "API Key Gemini belum aktif atau tidak valid. Rekaman suara Anda tetap aman & siap disimpan ke Google Drive.";
         }
-        showToast("Gagal memproses dengan AI: " + errorMsg, "error");
+        showToast("Info AI: " + errorMsg, "info");
       } finally {
         btn.disabled = false;
         btn.innerHTML = originalBtnHtml;
@@ -3636,10 +3640,15 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
     function finishAndProcessFromTableMode() {
       closeTableMode();
       stopAudioRecording();
-      // Otomatis picu Gemini AI transkripsi & rangkuman
-      setTimeout(() => {
-        transcribeAndSummarizeAudioWithAI();
-      }, 500);
+      
+      // Jika pengguna telah memasang Gemini API Key di Pengaturan, picu analisis AI secara otomatis
+      if (geminiApiKey && geminiApiKey.trim() !== "") {
+        setTimeout(() => {
+          transcribeAndSummarizeAudioWithAI(false);
+        }, 500);
+      } else {
+        showToast("Rekaman suara rapat berhasil disimpan ke formulir & siap diunggah ke Google Drive!", "success");
+      }
     }
 
     function startQuickTableMeeting() {
