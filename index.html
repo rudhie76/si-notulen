@@ -97,41 +97,125 @@
 
     /* Print styling khusus Berita Acara Formal & Visual Note 1 Halaman */
     @media print {
-      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      body * {
-        visibility: hidden !important;
+      * { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
       }
-      body:not(.print-visual-note-mode) #print-area,
-      body:not(.print-visual-note-mode) #print-area * {
-        visibility: visible !important;
-      }
-      body:not(.print-visual-note-mode) #print-area {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
+      
+      html, body {
+        background: #ffffff !important;
         margin: 0 !important;
-        padding: 20px !important;
-        box-shadow: none !important;
-        background: white !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
       }
 
-      body.print-visual-note-mode #visual-note-print-area,
-      body.print-visual-note-mode #visual-note-print-area * {
-        visibility: visible !important;
-      }
-      body.print-visual-note-mode #visual-note-print-area {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 15px !important;
-        box-shadow: none !important;
-        background: white !important;
-      }
-      .no-print {
+      /* Sembunyikan elemen navigasi, bilah aksi, dan dialog pendukung */
+      header, main, footer, nav, section, .no-print,
+      #setup-alert-banner, #modal-audio-player, #modal-settings, #table-mode-overlay {
         display: none !important;
+      }
+
+      /* Mode Cetak Normal: Berita Acara Rapat Resmi */
+      body:not(.print-visual-note-mode) #modal-visual-note {
+        display: none !important;
+      }
+
+      body:not(.print-visual-note-mode) #modal-berita-acara {
+        position: static !important;
+        inset: auto !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        overflow: visible !important;
+      }
+
+      body:not(.print-visual-note-mode) #modal-berita-acara > div {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      body:not(.print-visual-note-mode) #modal-berita-acara .flex-1 {
+        padding: 0 !important;
+        background: transparent !important;
+        overflow: visible !important;
+      }
+
+      body:not(.print-visual-note-mode) #print-area {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+      }
+
+      /* Mode Cetak Visual Note 1 Halaman */
+      body.print-visual-note-mode #modal-berita-acara {
+        display: none !important;
+      }
+
+      body.print-visual-note-mode #modal-visual-note {
+        position: static !important;
+        inset: auto !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        overflow: visible !important;
+      }
+
+      body.print-visual-note-mode #modal-visual-note > div {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      body.print-visual-note-mode #modal-visual-note .flex-1 {
+        padding: 0 !important;
+        background: transparent !important;
+        overflow: visible !important;
+      }
+
+      body.print-visual-note-mode #visual-note-print-area {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+      }
+
+      /* Mencegah pemotongan elemen di tengah halaman */
+      .avoid-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 15mm 15mm 15mm 15mm;
       }
     }
   </style>
@@ -941,7 +1025,7 @@
         <div id="print-area" class="bg-white border border-slate-300 p-8 sm:p-12 shadow-md max-w-3xl mx-auto text-slate-900 leading-relaxed text-sm">
           
           <!-- Kop Surat Resmi: PEMERINTAH KABUPATEN PENAJAM PASER UTARA - KECAMATAN WARU -->
-          <div class="relative pb-3 mb-6 border-b-[3px] border-black">
+          <div class="relative pb-3 mb-5 border-b-[3px] border-black avoid-break">
             <div class="flex items-center justify-between gap-3">
               <!-- Logo Lambang Daerah (Kiri) -->
               <div class="w-20 sm:w-24 flex-shrink-0 flex items-center justify-center">
@@ -973,28 +1057,28 @@
           </div>
 
           <!-- Nomor & Judul Dokumen -->
-          <div class="text-center my-5">
+          <div class="text-center my-4 avoid-break">
             <h3 class="text-base sm:text-lg font-bold uppercase underline tracking-wide">BERITA ACARA RAPAT</h3>
             <p class="text-xs text-slate-600 font-mono mt-0.5">NOMOR: <span id="doc-id">NOT-20261029-XXXX</span></p>
           </div>
 
           <!-- Paragraf Pembuka -->
-          <p class="mb-4 text-justify">
+          <p class="mb-3 text-justify text-xs sm:text-sm avoid-break">
             Pada hari ini, <strong id="doc-hari-tanggal">-</strong> telah diselenggarakan rapat resmi dengan rincian pelaksanaan sebagai berikut:
           </p>
 
           <!-- Tabel Rincian Pelaksanaan -->
-          <table class="w-full mb-5 border-collapse text-xs sm:text-sm">
+          <table class="w-full mb-4 border-collapse text-xs sm:text-sm avoid-break">
             <tbody>
               <tr class="border-b border-slate-200">
-                <td class="py-1.5 font-bold w-44 text-slate-700">Topik / Judul Rapat</td>
-                <td class="py-1.5 w-4">:</td>
-                <td id="doc-judul" class="py-1.5 font-semibold text-slate-900">-</td>
+                <td class="py-1.5 font-bold w-40 text-slate-700 align-top">Topik / Judul Rapat</td>
+                <td class="py-1.5 w-4 align-top">:</td>
+                <td id="doc-judul" class="py-1.5 font-semibold text-slate-900 leading-snug">-</td>
               </tr>
               <tr class="border-b border-slate-200">
                 <td class="py-1.5 font-bold text-slate-700">Waktu Pelaksanaan</td>
                 <td class="py-1.5">:</td>
-                <td id="doc-waktu" class="py-1.5">-</td>
+                <td id="doc-waktu" class="py-1.5 font-medium">-</td>
               </tr>
               <tr class="border-b border-slate-200">
                 <td class="py-1.5 font-bold text-slate-700">Pimpinan Rapat</td>
@@ -1009,31 +1093,31 @@
               <tr>
                 <td class="py-1.5 font-bold text-slate-700 align-top">Daftar Hadir Peserta</td>
                 <td class="py-1.5 align-top">:</td>
-                <td id="doc-peserta" class="py-1.5 whitespace-pre-line text-slate-800">-</td>
+                <td id="doc-peserta" class="py-1.5 whitespace-pre-line text-slate-800 leading-snug">-</td>
               </tr>
             </tbody>
           </table>
 
           <!-- Poin I: Agenda Rapat -->
-          <div class="mb-4">
-            <h4 class="font-bold text-sm uppercase text-navy-900 border-b border-slate-300 pb-1 mb-2">I. AGENDA PEMBAHASAN</h4>
-            <div id="doc-agenda" class="whitespace-pre-line text-slate-800 text-xs sm:text-sm pl-2">-</div>
+          <div class="mb-3.5 avoid-break">
+            <h4 class="font-bold text-xs sm:text-sm uppercase text-navy-900 border-b border-slate-300 pb-1 mb-1.5">I. AGENDA PEMBAHASAN</h4>
+            <div id="doc-agenda" class="whitespace-pre-line text-slate-800 text-xs sm:text-sm pl-2 leading-relaxed">-</div>
           </div>
 
           <!-- Poin II: Hasil Kesepakatan / Risalah -->
-          <div class="mb-4">
-            <h4 class="font-bold text-sm uppercase text-navy-900 border-b border-slate-300 pb-1 mb-2">II. HASIL KESEPAKATAN & RISALAH RAPAT</h4>
+          <div class="mb-3.5 avoid-break">
+            <h4 class="font-bold text-xs sm:text-sm uppercase text-navy-900 border-b border-slate-300 pb-1 mb-1.5">II. HASIL KESEPAKATAN & RISALAH RAPAT</h4>
             <div id="doc-hasil" class="whitespace-pre-line text-slate-800 text-xs sm:text-sm pl-2 leading-relaxed">-</div>
           </div>
 
           <!-- Poin III: Tindak Lanjut -->
-          <div class="mb-6">
-            <h4 class="font-bold text-sm uppercase text-navy-900 border-b border-slate-300 pb-1 mb-2">III. TINDAK LANJUT / ACTION PLAN</h4>
-            <div id="doc-tindaklanjut" class="whitespace-pre-line text-slate-800 text-xs sm:text-sm pl-2">-</div>
+          <div class="mb-4 avoid-break">
+            <h4 class="font-bold text-xs sm:text-sm uppercase text-navy-900 border-b border-slate-300 pb-1 mb-1.5">III. TINDAK LANJUT / ACTION PLAN</h4>
+            <div id="doc-tindaklanjut" class="whitespace-pre-line text-slate-800 text-xs sm:text-sm pl-2 leading-relaxed">-</div>
           </div>
 
           <!-- Berkas Lampiran Info -->
-          <div id="doc-lampiran-info" class="mb-6 text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-200">
+          <div id="doc-lampiran-info" class="mb-4 text-[11px] sm:text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-200 avoid-break">
             <strong>Catatan Arsip Digital:</strong>
             <span id="doc-undangan-text">Surat undangan resmi tersimpan di Drive.</span> | 
             <span id="doc-audio-text">Rekaman suara tersedia di Drive.</span> | 
@@ -1041,19 +1125,19 @@
           </div>
 
           <!-- Paragraf Penutup & Tanda Tangan -->
-          <p class="mb-8 text-justify text-xs sm:text-sm">
+          <p class="mb-5 text-justify text-xs sm:text-sm avoid-break leading-relaxed">
             Demikian Berita Acara Rapat ini dibuat dengan sebenarnya dengan penuh tanggung jawab untuk dipergunakan sebagaimana mestinya.
           </p>
 
-          <div class="grid grid-cols-2 gap-8 text-center text-xs sm:text-sm mt-8 pt-4">
+          <div class="grid grid-cols-2 gap-8 text-center text-xs sm:text-sm mt-6 pt-2 avoid-break">
             <div>
-              <p class="font-medium text-slate-600">Notulis,</p>
-              <div class="h-20 sm:h-24"></div>
+              <p class="font-medium text-slate-700">Notulis,</p>
+              <div class="h-16 sm:h-20"></div>
               <p id="doc-sign-notulis" class="font-bold underline text-slate-900">(..........................................)</p>
             </div>
             <div>
-              <p class="font-medium text-slate-600">Pimpinan Rapat,</p>
-              <div class="h-20 sm:h-24"></div>
+              <p class="font-medium text-slate-700">Pimpinan Rapat,</p>
+              <div class="h-16 sm:h-20"></div>
               <p id="doc-sign-pimpinan" class="font-bold underline text-slate-900">(..........................................)</p>
             </div>
           </div>
@@ -3029,6 +3113,23 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       }
     }
 
+    function formatDocWaktu(dateStr) {
+      if (!dateStr) return "-";
+      try {
+        const dt = new Date(dateStr);
+        if (!isNaN(dt.getTime())) {
+          const jam = String(dt.getHours()).padStart(2, "0");
+          const mnt = String(dt.getMinutes()).padStart(2, "0");
+          if (dateStr.includes("T") || dateStr.includes(":")) {
+            return `Pukul ${jam}.${mnt} WITA - Selesai`;
+          }
+          return `Pukul 09.00 WITA - Selesai`;
+        }
+      } catch (e) {}
+      const clean = dateStr.replace(/Z/g, "").replace(/WIB/gi, "").trim();
+      return clean + " WITA";
+    }
+
     // ========================================================================
     // MODAL FORMAT CETAK BERITA ACARA FORMAL
     // ========================================================================
@@ -3036,8 +3137,32 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       activeBeritaAcaraMeeting = meeting;
       document.getElementById("doc-id").innerText = meeting.id;
       document.getElementById("doc-hari-tanggal").innerText = formatIndoFullDate(meeting.tanggal);
-      document.getElementById("doc-judul").innerText = meeting.judulRapat;
-      document.getElementById("doc-waktu").innerText = meeting.tanggal + " WIB";
+
+      // Bersihkan Judul Rapat jika memuat seluruh isi surat undangan (akibat ekstraksi teks OCR)
+      let cleanJudul = (meeting.judulRapat || "").trim();
+      if (cleanJudul.length > 80 && (
+          cleanJudul.includes("Undangan Yth") || 
+          cleanJudul.includes("Dalam rangka") || 
+          cleanJudul.includes("Sehubungan") ||
+          cleanJudul.includes("TCPDF") ||
+          cleanJudul.includes("${ttd")
+      )) {
+        if (meeting.agenda && meeting.agenda.trim().length > 5 && meeting.agenda.trim().length < 150) {
+          cleanJudul = meeting.agenda.trim();
+          if (!cleanJudul.toLowerCase().startsWith("pembahasan") && !cleanJudul.toLowerCase().startsWith("rapat")) {
+            cleanJudul = "Pembahasan " + cleanJudul;
+          }
+        } else {
+          const agMatch = cleanJudul.match(/(?:Agenda|Acara)\s*[:=]\s*([^\n\r.]+)/i);
+          if (agMatch && agMatch[1] && agMatch[1].trim().length > 5) {
+            cleanJudul = agMatch[1].replace(/^[.\s-]+/, "").trim();
+          } else {
+            cleanJudul = cleanJudul.substring(0, 95).trim() + "...";
+          }
+        }
+      }
+      document.getElementById("doc-judul").innerText = cleanJudul;
+      document.getElementById("doc-waktu").innerText = formatDocWaktu(meeting.tanggal);
       document.getElementById("doc-pimpinan").innerText = meeting.pimpinanRapat;
       document.getElementById("doc-notulis").innerText = meeting.notulis;
       document.getElementById("doc-peserta").innerText = meeting.peserta || "-";
@@ -3045,8 +3170,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       document.getElementById("doc-hasil").innerText = meeting.hasilKesepakatan;
       document.getElementById("doc-tindaklanjut").innerText = meeting.tindakLanjut || "-";
 
-      document.getElementById("doc-sign-notulis").innerText = meeting.notulis;
-      document.getElementById("doc-sign-pimpinan").innerText = meeting.pimpinanRapat;
+      document.getElementById("doc-sign-notulis").innerText = meeting.notulis || "(..........................................)";
+      document.getElementById("doc-sign-pimpinan").innerText = meeting.pimpinanRapat || "(..........................................)";
 
       // Info lampiran digital
       const hasAudio = meeting.urlAudio && meeting.urlAudio.trim() !== "";
@@ -3746,8 +3871,23 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       const navBtnCreateText = document.querySelector("#nav-btn-create span");
       if (navBtnCreateText) navBtnCreateText.innerText = "Edit Notulen (" + meeting.id + ")";
 
-      // Isi input form
-      document.getElementById("input-judul").value = meeting.judulRapat || "";
+      // Isi input form (bersihkan judul jika memuat dump surat undangan)
+      let cleanJudul = (meeting.judulRapat || "").trim();
+      if (cleanJudul.length > 80 && (
+          cleanJudul.includes("Undangan Yth") || 
+          cleanJudul.includes("Dalam rangka") || 
+          cleanJudul.includes("Sehubungan") ||
+          cleanJudul.includes("TCPDF") ||
+          cleanJudul.includes("${ttd")
+      )) {
+        if (meeting.agenda && meeting.agenda.trim().length > 5 && meeting.agenda.trim().length < 150) {
+          cleanJudul = meeting.agenda.trim();
+          if (!cleanJudul.toLowerCase().startsWith("pembahasan") && !cleanJudul.toLowerCase().startsWith("rapat")) {
+            cleanJudul = "Pembahasan " + cleanJudul;
+          }
+        }
+      }
+      document.getElementById("input-judul").value = cleanJudul;
       document.getElementById("input-tanggal").value = parseTanggalToDatetimeInput(meeting.tanggal);
       document.getElementById("input-tempat").value = meeting.tempat || "";
       document.getElementById("input-pimpinan").value = meeting.pimpinanRapat || "";
