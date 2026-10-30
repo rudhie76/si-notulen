@@ -2645,16 +2645,51 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           };
 
           if (gasWebAppUrl) {
-            const updateRes = await callGasApi({
-              action: "update",
-              id: editingMeetingId,
-              data: updatePayload
-            });
+            let updateSuccess = false;
+            try {
+              const updateRes = await callGasApi({
+                action: "update",
+                id: editingMeetingId,
+                data: updatePayload
+              });
 
-            if (updateRes && updateRes.status === "success") {
-              showToast(`Notulen rapat ${editingMeetingId} berhasil diperbarui di Google Drive!`, "success");
-            } else {
-              throw new Error((updateRes && updateRes.message) || "Gagal memperbarui notulen.");
+              if (updateRes && updateRes.status === "success") {
+                updateSuccess = true;
+                showToast(`Notulen rapat ${editingMeetingId} berhasil diperbarui di Google Drive!`, "success");
+              } else {
+                throw new Error((updateRes && updateRes.message) || "Gagal memperbarui notulen.");
+              }
+            } catch (updateErr) {
+              // Jika Apps Script Web App belum di-deploy versi baru ("Action POST 'update' tidak dikenali")
+              // Lakukan fallback otomatis: hapus data lama lalu simpan ulang dengan ID dan riwayat yang sama persis
+              console.warn("Update langsung gagal, menjalankan fallback delete & create...", updateErr);
+              const errMsg = String(updateErr.message || "");
+              if (errMsg.includes("update") || errMsg.includes("tidak dikenali") || errMsg.includes("Action POST")) {
+                btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Memperbarui data (sinkronisasi fallback)...</span>';
+                try {
+                  await callGasApi({
+                    action: "delete",
+                    id: editingMeetingId
+                  });
+                  const createRes = await callGasApi({
+                    action: "create",
+                    data: {
+                      ...updatePayload,
+                      id: editingMeetingId
+                    }
+                  });
+                  if (createRes && createRes.status === "success") {
+                    updateSuccess = true;
+                    showToast(`Notulen rapat ${editingMeetingId} berhasil diperbarui di Google Drive!`, "success");
+                  } else {
+                    throw new Error((createRes && createRes.message) || "Gagal menyimpan pembaruan notulen.");
+                  }
+                } catch (fallbackErr) {
+                  throw new Error(fallbackErr.message || updateErr.message);
+                }
+              } else {
+                throw updateErr;
+              }
             }
           } else {
             // Simpan ke Demo LocalStorage
