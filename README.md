@@ -105,12 +105,28 @@ Anda dapat membuka file `index.html` langsung di browser Anda (klik ganda file `
 4. Klik **Uji Koneksi** untuk memverifikasi. Jika berhasil, akan muncul notifikasi sukses berwarna hijau.
 5. Klik **Simpan Konfigurasi**. Pengaturan ini otomatis tersimpan di browser Anda (`localStorage`).
 
-### Cara 2: Menetapkan URL Secara Permanen di Kode
-Buka file `index.html`, baris berikut telah otomatis dikonfigurasi ke URL Web App Anda:
+### Cara 1: Menetapkan URL & Kunci API Secara Permanen di Kode
+Buka file `index.html`, pada bagian awal skrip telah disediakan konstanta permanen:
 ```javascript
+// 1. URL Backend Google Apps Script Web App (Terkoneksi ke Google Drive & Sheets)
 const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyIwHyGfax9VvYg-Ca9GZE43wJsLJSo2kCbtWeZPfBky-ttjwgGG7be9-F8qxGtUkJ5kA/exec";
+
+// 2. Kunci Google Gemini AI API Key Permanen (Otomatis aktif di semua HP/Laptop)
+const DEFAULT_GEMINI_KEY = ""; 
 ```
-Aplikasi langsung terhubung secara otomatis ke Google Drive tanpa konfigurasi manual.
+Aplikasi langsung terhubung secara otomatis ke Google Drive dan AI tanpa konfigurasi manual pada perangkat manapun.
+
+### Cara 2: Menyimpan Kunci API Permanen ke Cloud Backend (Google Apps Script)
+1. Buka aplikasi, klik ikon gerigi / status koneksi di pojok kanan atas navbar untuk membuka modal **Konfigurasi API & Cloud Backend**.
+2. Masukkan **Google Gemini AI API Key** Anda pada kolom yang tersedia.
+3. Klik tombol **Simpan ke Cloud Backend**.
+4. Kunci API Anda akan tersimpan secara permanen di server Google Apps Script (`ScriptProperties`).
+5. **Hasilnya:** Setiap smartphone, tablet, atau laptop baru yang membuka aplikasi ini akan otomatis mengunduh dan menyinkronkan kunci API tersebut tanpa perlu mengetik ulang!
+
+### Cara 3: Membagikan Tautan Akses Siap Pakai (Direct Link)
+1. Di dalam modal pengaturan, klik tombol **Salin Tautan Akses Siap Pakai (Langsung Aktif di HP/WhatsApp)**.
+2. Kirim tautan tersebut ke grup WhatsApp rapat atau buka di smartphone Anda.
+3. Begitu tautan dibuka di browser HP, konfigurasi API langsung tersimpan otomatis di perangkat tersebut secara permanen.
 
 ---
 

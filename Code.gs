@@ -22,6 +22,38 @@ const UNDANGAN_FOLDER_NAME = "Surat_Undangan";
 const DB_SHEET_NAME        = "DB_Notulen_Rapat";
 const SHEET_TAB_NAME       = "Data_Rapat";
 
+// Konfigurasi Cloud Default Kunci Gemini AI
+// (Dapat diatur lewat menu Pengaturan di aplikasi atau diisi di sini agar permanen)
+const DEFAULT_CLOUD_GEMINI_KEY = "";
+
+/**
+ * Mengambil Kunci Google Gemini AI yang tersimpan secara permanen di Cloud Backend.
+ * Mengutamakan Script Properties (disimpan via antarmuka web), lalu fallback ke konstanta.
+ */
+function getCloudGeminiApiKey() {
+  try {
+    const scriptProps = PropertiesService.getScriptProperties();
+    const storedKey = scriptProps.getProperty("GEMINI_API_KEY");
+    if (storedKey && storedKey.trim() !== "") {
+      return storedKey.trim();
+    }
+  } catch (err) {
+    console.warn("Gagal membaca ScriptProperties:", err);
+  }
+  return DEFAULT_CLOUD_GEMINI_KEY || "";
+}
+
+/**
+ * Menyimpan Kunci Google Gemini AI secara permanen ke Cloud Backend (Script Properties).
+ * Setiap perangkat/browser yang terhubung ke Web App ini otomatis mendapatkan kunci ini.
+ */
+function setCloudGeminiApiKey(apiKey) {
+  const scriptProps = PropertiesService.getScriptProperties();
+  const cleanKey = (apiKey || "").toString().trim();
+  scriptProps.setProperty("GEMINI_API_KEY", cleanKey);
+  return cleanKey;
+}
+
 // Header Kolom Database
 const TABLE_HEADERS = [
   "ID",
@@ -173,6 +205,7 @@ function doGet(e) {
       try {
         const template = HtmlService.createTemplateFromFile("index");
         template.gasWebAppUrl = ScriptApp.getService().getUrl();
+        template.geminiApiKey = getCloudGeminiApiKey();
         return template.evaluate()
           .setTitle("Sistem Notulen & Berita Acara Rapat Digital")
           .addMetaTag("viewport", "width=device-width, initial-scale=1.0")
@@ -189,6 +222,16 @@ function doGet(e) {
         status: "success",
         message: "API Sistem Notulen Rapat aktif dan terhubung.",
         webAppUrl: ScriptApp.getService().getUrl(),
+        geminiApiKey: getCloudGeminiApiKey(),
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    if (effectiveAction === "get_config") {
+      return createJsonResponse({
+        status: "success",
+        webAppUrl: ScriptApp.getService().getUrl(),
+        geminiApiKey: getCloudGeminiApiKey(),
         timestamp: new Date().toISOString()
       });
     }
@@ -201,6 +244,7 @@ function doGet(e) {
       return createJsonResponse({
         status: "success",
         webAppUrl: ScriptApp.getService().getUrl(),
+        geminiApiKey: getCloudGeminiApiKey(),
         data: data,
         total: data.length
       });
@@ -248,6 +292,8 @@ function doPost(e) {
       const data = getAllMeetings(resources.sheet);
       return createJsonResponse({
         status: "success",
+        webAppUrl: ScriptApp.getService().getUrl(),
+        geminiApiKey: getCloudGeminiApiKey(),
         data: data,
         total: data.length
       });
@@ -480,6 +526,32 @@ function doPost(e) {
           message: "Data notulen dengan ID " + targetId + " tidak ditemukan."
         });
       }
+    }
+
+    // 8. ACTION: SIMPAN KONFIGURASI PERMANEN KE CLOUD BACKEND (Script Properties)
+    if (action === "save_config") {
+      let savedKey = "";
+      if (payload.geminiApiKey !== undefined) {
+        savedKey = setCloudGeminiApiKey(payload.geminiApiKey);
+      } else {
+        savedKey = getCloudGeminiApiKey();
+      }
+
+      return createJsonResponse({
+        status: "success",
+        message: "Kunci API Google Gemini berhasil disimpan permanen di Cloud Backend Google Apps Script! Semua perangkat (HP, Tablet, Laptop) otomatis tersinkronisasi.",
+        webAppUrl: ScriptApp.getService().getUrl(),
+        geminiApiKey: savedKey
+      });
+    }
+
+    // 9. ACTION: AMBIL KONFIGURASI DARI CLOUD BACKEND
+    if (action === "get_config") {
+      return createJsonResponse({
+        status: "success",
+        webAppUrl: ScriptApp.getService().getUrl(),
+        geminiApiKey: getCloudGeminiApiKey()
+      });
     }
 
     return createJsonResponse({

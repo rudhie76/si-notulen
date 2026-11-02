@@ -1,0 +1,33 @@
+{
+  "name": "SI-NOTULEN - Kec. Waru Kab. PPU",
+  "short_name": "SI-NOTULEN",
+  "description": "Sistem Notulen & Berita Acara Rapat Digital Terintegrasi Google Drive & AI",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0A173B",
+  "theme_color": "#1E3A8A",
+  "lang": "id",
+  "categories": ["productivity", "utilities", "business"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "73x85",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
