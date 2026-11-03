@@ -862,17 +862,80 @@
             </div>
           </div>
 
+          <!-- Banner Pemulihan Audio (Emergency Recovery jika halaman ter-refresh/tertutup) -->
+          <div id="audio-recovery-banner" class="hidden bg-gradient-to-r from-amber-950/90 via-amber-900/80 to-slate-900 border border-amber-500/50 rounded-xl p-3.5 text-xs text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg animate-in fade-in">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-400/40 flex items-center justify-center text-sm flex-shrink-0">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </div>
+              <div>
+                <p class="font-bold text-white text-xs">Ditemukan Rekaman Audio Sebelumnya yang Belum Tersimpan!</p>
+                <p id="audio-recovery-info" class="text-[11px] text-amber-200/80 mt-0.5">Terselamatkan otomatis dari memori cadangan browser.</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 self-end sm:self-auto flex-shrink-0">
+              <button type="button" onclick="recoverAudioFromIndexedDB()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow flex items-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-rotate-left text-xs"></i>
+                <span>Pulihkan Rekaman</span>
+              </button>
+              <button type="button" onclick="dismissAudioRecovery()" class="p-1.5 text-slate-400 hover:text-white" title="Abaikan / Hapus Cadangan">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
           <!-- Audio Preview Player (Muncul setelah selesai rekam) -->
           <div id="audio-preview-container" class="hidden bg-white/5 border border-white/10 rounded-xl p-4 space-y-3.5">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <!-- Header Kartu Audio & Status Penyimpanan Drive -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-black/30 p-3.5 rounded-xl border border-white/10">
               <div class="flex items-center space-x-3 w-full sm:w-auto">
-                <i class="fa-solid fa-circle-play text-2xl text-emerald-400"></i>
+                <i class="fa-solid fa-circle-play text-2xl text-emerald-400 flex-shrink-0"></i>
                 <div>
-                  <p class="text-xs font-bold text-white">Hasil Rekaman Siap Diunggah</p>
-                  <p id="audio-file-meta" class="text-[11px] text-blue-200/70">Durasi: 00:00 | Ukuran: ~0 KB</p>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-xs font-bold text-white">Hasil Rekaman Suara Rapat</p>
+                    <span id="audio-drive-status-badge" class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold px-2 py-0.5 rounded-full flex items-center space-x-1">
+                      <i class="fa-solid fa-clock text-[9px]"></i>
+                      <span id="audio-drive-status-text">Tersimpan di Browser (Belum ke Drive)</span>
+                    </span>
+                  </div>
+                  <p id="audio-file-meta" class="text-[11px] text-blue-200/70 mt-0.5">Durasi: 00:00 | Ukuran: ~0 KB</p>
                 </div>
               </div>
-              <audio id="audio-player" controls class="w-full sm:max-w-md h-9"></audio>
+
+              <!-- Tombol Aksi Langsung: Simpan ke Drive Sekarang & Unduh File -->
+              <div class="flex items-center space-x-2 w-full sm:w-auto justify-end flex-wrap gap-y-1.5">
+                <button type="button" id="btn-save-audio-drive-now" onclick="uploadAudioToDriveImmediately()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer" title="Unggah dan amankan berkas audio ke Google Drive sekarang tanpa menunggu isi formulir">
+                  <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                  <span>Simpan ke Drive Sekarang</span>
+                </button>
+                <button type="button" id="btn-download-audio-local" onclick="downloadCurrentAudioFile()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/15 transition flex items-center space-x-1.5 cursor-pointer" title="Unduh berkas rekaman (.webm) ke HP/Laptop sebagai arsip cadangan">
+                  <i class="fa-solid fa-download text-xs"></i>
+                  <span>Unduh Audio</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Tautan Langsung Berkas Audio di Drive (Muncul setelah tersimpan di Drive) -->
+            <div id="audio-drive-direct-link" class="hidden bg-emerald-950/60 border border-emerald-500/40 p-2.5 rounded-lg flex items-center justify-between text-xs text-emerald-200">
+              <div class="flex items-center space-x-2 truncate">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span class="font-medium truncate">Berkas audio telah tersimpan permanen di folder Google Drive <strong>Rekaman_Audio/</strong></span>
+              </div>
+              <a id="audio-drive-link-anchor" href="#" target="_blank" class="text-blue-300 hover:text-white underline font-semibold flex items-center space-x-1 ml-2 flex-shrink-0">
+                <span>Buka di Drive</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+
+            <!-- Audio Player -->
+            <div class="bg-black/20 p-2.5 rounded-lg border border-white/5">
+              <audio id="audio-player" controls class="w-full h-9"></audio>
+            </div>
+
+            <!-- Catatan Edukasi Penyimpanan Audio -->
+            <div id="audio-save-guidance-box" class="text-[11px] text-amber-200/90 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 flex items-start space-x-2">
+              <i class="fa-solid fa-circle-info text-amber-300 mt-0.5 flex-shrink-0"></i>
+              <span><strong>Catatan:</strong> Tombol <em>'Selesai'</em> pada perekam hanya menghentikan mikrofon ke pemutar browser. Untuk menyimpannya ke Google Drive, Anda dapat mengklik <strong>'Simpan ke Drive Sekarang'</strong> di atas, atau klik tombol <strong>'Simpan Notulen ke Google Drive'</strong> di bagian paling bawah formulir.</span>
             </div>
 
             <!-- Tombol Aksi AI: Transkripsi & Rangkum Otomatis -->
@@ -1725,6 +1788,7 @@
     let audioChunks = [];
     let audioBlob = null;
     let audioBase64 = null;
+    let uploadedAudioDriveUrl = "";
     let recordInterval = null;
     let recordSeconds = 0;
     let isRecordingPaused = false;
@@ -1774,6 +1838,9 @@
 
       // Sinkronkan konfigurasi API dari Cloud Backend jika tersedia
       syncCloudConfigFromBackend();
+
+      // Periksa apakah ada rekaman audio darurat yang belum tersimpan
+      checkAudioDraftOnStartup();
     });
 
     function updateConnectionStatusUI() {
@@ -1869,6 +1936,13 @@
           const sizeKb = (audioBlob.size / 1024).toFixed(1);
           document.getElementById("audio-file-meta").innerText = `Durasi: ${formatTimer(recordSeconds)} | Ukuran: ~${sizeKb} KB`;
           document.getElementById("audio-preview-container").classList.remove("hidden");
+
+          uploadedAudioDriveUrl = "";
+          updateAudioDriveStatusUI("pending");
+
+          // Simpan cadangan audio darurat ke IndexedDB agar tidak hilang jika reload/tutup tab
+          const judulVal = document.getElementById("input-judul") ? document.getElementById("input-judul").value : "";
+          saveAudioDraftToDB(audioBlob, recordSeconds, judulVal);
 
           // Matikan semua track mikrofon
           stream.getTracks().forEach(track => track.stop());
@@ -1985,7 +2059,7 @@
       document.getElementById("btn-pause-record").classList.add("text-white/50", "cursor-not-allowed");
       document.getElementById("btn-stop-record").disabled = true;
 
-      showToast("Perekaman audio selesai! Siap diproses menjadi notulen & visual note.", "success");
+      showToast("Perekaman audio selesai! Anda dapat menyimpannya ke Drive sekarang atau simpan notulen di bawah.", "success");
     }
 
     function resetAudioRecording() {
@@ -2000,6 +2074,9 @@
       audioChunks = [];
       audioBlob = null;
       audioBase64 = null;
+      uploadedAudioDriveUrl = "";
+      updateAudioDriveStatusUI("reset");
+      clearAudioDraftFromDB();
       recordSeconds = 0;
       isRecordingPaused = false;
 
@@ -2048,6 +2125,9 @@
       reader.onload = function(e) {
         audioBase64 = e.target.result;
         audioBlob = file;
+        uploadedAudioDriveUrl = "";
+        updateAudioDriveStatusUI("pending");
+        saveAudioDraftToDB(file, 0, file.name);
 
         // Tampilkan pemutar preview
         const player = document.getElementById("audio-player");
@@ -2078,6 +2158,270 @@
       const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
       const s = String(sec % 60).padStart(2, "0");
       return `${h}:${m}:${s}`;
+    }
+
+    // ========================================================================
+    // MODUL PENYIMPANAN LANGSUNG AUDIO KE DRIVE & CADANGAN DARURAT (INDEXEDDB)
+    // ========================================================================
+    const NOTULEN_DB_NAME = "SiNotulenDB";
+    const NOTULEN_DB_VERSION = 1;
+    const NOTULEN_AUDIO_STORE = "audio_drafts";
+
+    function openNotulenDB() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) {
+          resolve(null);
+          return;
+        }
+        try {
+          const req = indexedDB.open(NOTULEN_DB_NAME, NOTULEN_DB_VERSION);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(NOTULEN_AUDIO_STORE)) {
+              db.createObjectStore(NOTULEN_AUDIO_STORE, { keyPath: "id" });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }
+
+    async function saveAudioDraftToDB(blob, durationSec, title) {
+      try {
+        if (!blob) return;
+        const db = await openNotulenDB();
+        if (!db) return;
+        const tx = db.transaction(NOTULEN_AUDIO_STORE, "readwrite");
+        const store = tx.objectStore(NOTULEN_AUDIO_STORE);
+        store.put({
+          id: "current_recording",
+          blob: blob,
+          mimeType: blob.type || "audio/webm",
+          durationSec: durationSec || 0,
+          title: title || "Rekaman Rapat",
+          savedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn("Gagal mencadangkan audio ke IndexedDB:", err);
+      }
+    }
+
+    async function getAudioDraftFromDB() {
+      try {
+        const db = await openNotulenDB();
+        if (!db) return null;
+        return new Promise((resolve) => {
+          const tx = db.transaction(NOTULEN_AUDIO_STORE, "readonly");
+          const store = tx.objectStore(NOTULEN_AUDIO_STORE);
+          const req = store.get("current_recording");
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (err) {
+        return null;
+      }
+    }
+
+    async function clearAudioDraftFromDB() {
+      try {
+        const db = await openNotulenDB();
+        if (!db) return;
+        const tx = db.transaction(NOTULEN_AUDIO_STORE, "readwrite");
+        const store = tx.objectStore(NOTULEN_AUDIO_STORE);
+        store.delete("current_recording");
+      } catch (err) {
+        console.warn("Gagal membersihkan cadangan audio IndexedDB:", err);
+      }
+    }
+
+    async function checkAudioDraftOnStartup() {
+      try {
+        const draft = await getAudioDraftFromDB();
+        if (draft && draft.blob) {
+          const banner = document.getElementById("audio-recovery-banner");
+          const infoEl = document.getElementById("audio-recovery-info");
+          if (banner && infoEl) {
+            const timeStr = draft.savedAt ? new Date(draft.savedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "";
+            const durStr = draft.durationSec ? formatTimer(draft.durationSec) : "";
+            infoEl.innerText = `Rekaman terselamatkan (${durStr ? 'Durasi ' + durStr + ' | ' : ''}Pukul ${timeStr}). Klik 'Pulihkan Rekaman' untuk memuat kembali.`;
+            banner.classList.remove("hidden");
+          }
+        }
+      } catch (e) {
+        console.warn("Error memeriksa draft audio:", e);
+      }
+    }
+
+    async function recoverAudioFromIndexedDB() {
+      try {
+        const draft = await getAudioDraftFromDB();
+        if (!draft || !draft.blob) {
+          showToast("Tidak ada berkas audio cadangan untuk dipulihkan.", "info");
+          dismissAudioRecovery();
+          return;
+        }
+
+        audioBlob = draft.blob;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          audioBase64 = reader.result;
+          
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const player = document.getElementById("audio-player");
+          player.src = audioUrl;
+
+          const sizeKb = (audioBlob.size / 1024).toFixed(1);
+          const durStr = draft.durationSec ? formatTimer(draft.durationSec) : "00:00";
+          document.getElementById("audio-file-meta").innerText = `Durasi: ${durStr} | Ukuran: ~${sizeKb} KB (Dipulihkan)`;
+          document.getElementById("audio-preview-container").classList.remove("hidden");
+          document.getElementById("btn-reset-record").classList.remove("hidden");
+
+          uploadedAudioDriveUrl = "";
+          updateAudioDriveStatusUI("pending");
+          dismissAudioRecovery();
+          showToast("Rekaman audio rapat berhasil dipulihkan dari memori cadangan!", "success");
+        };
+        reader.readAsDataURL(audioBlob);
+      } catch (err) {
+        console.error("Gagal memulihkan audio:", err);
+        showToast("Gagal memulihkan rekaman: " + err.message, "error");
+      }
+    }
+
+    function dismissAudioRecovery() {
+      const banner = document.getElementById("audio-recovery-banner");
+      if (banner) banner.classList.add("hidden");
+      clearAudioDraftFromDB();
+    }
+
+    function updateAudioDriveStatusUI(status, driveUrl = "") {
+      const badge = document.getElementById("audio-drive-status-badge");
+      const badgeText = document.getElementById("audio-drive-status-text");
+      const btnSaveNow = document.getElementById("btn-save-audio-drive-now");
+      const directLink = document.getElementById("audio-drive-direct-link");
+      const linkAnchor = document.getElementById("audio-drive-link-anchor");
+      const guidanceBox = document.getElementById("audio-save-guidance-box");
+
+      if (status === "saved" && driveUrl) {
+        if (badge) {
+          badge.className = "text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold px-2 py-0.5 rounded-full flex items-center space-x-1";
+        }
+        if (badgeText) badgeText.innerText = "Tersimpan di Google Drive";
+        if (btnSaveNow) {
+          btnSaveNow.innerHTML = '<i class="fa-solid fa-circle-check text-xs"></i><span>Tersimpan di Drive</span>';
+          btnSaveNow.className = "px-3 py-1.5 rounded-lg bg-emerald-700/80 text-white font-bold text-xs shadow flex items-center space-x-1.5 cursor-default";
+          btnSaveNow.disabled = true;
+        }
+        if (directLink && linkAnchor) {
+          directLink.classList.remove("hidden");
+          linkAnchor.href = driveUrl;
+        }
+        if (guidanceBox) guidanceBox.classList.add("hidden");
+      } else if (status === "pending") {
+        if (badge) {
+          badge.className = "text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold px-2 py-0.5 rounded-full flex items-center space-x-1";
+        }
+        if (badgeText) badgeText.innerText = "Tersimpan di Browser (Belum ke Drive)";
+        if (btnSaveNow) {
+          btnSaveNow.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-xs"></i><span>Simpan ke Drive Sekarang</span>';
+          btnSaveNow.className = "px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer";
+          btnSaveNow.disabled = false;
+        }
+        if (directLink) directLink.classList.add("hidden");
+        if (guidanceBox) guidanceBox.classList.remove("hidden");
+      } else if (status === "reset") {
+        if (badge) {
+          badge.className = "text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold px-2 py-0.5 rounded-full flex items-center space-x-1";
+        }
+        if (badgeText) badgeText.innerText = "Tersimpan di Browser (Belum ke Drive)";
+        if (btnSaveNow) {
+          btnSaveNow.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-xs"></i><span>Simpan ke Drive Sekarang</span>';
+          btnSaveNow.className = "px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer";
+          btnSaveNow.disabled = false;
+        }
+        if (directLink) directLink.classList.add("hidden");
+        if (guidanceBox) guidanceBox.classList.remove("hidden");
+      }
+    }
+
+    async function uploadAudioToDriveImmediately() {
+      if (!audioBase64) {
+        showToast("Belum ada rekaman audio untuk disimpan ke Drive.", "info");
+        return;
+      }
+
+      if (!gasWebAppUrl || gasWebAppUrl.trim() === "") {
+        showToast("URL Google Apps Script belum terpasang. Periksa menu Pengaturan.", "error");
+        openSettingsModal();
+        return;
+      }
+
+      const btn = document.getElementById("btn-save-audio-drive-now");
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-xs"></i><span>Mengunggah ke Drive...</span>';
+
+      try {
+        let audioMime = "audio/webm";
+        let ext = "webm";
+        if (audioBlob && audioBlob.type) {
+          audioMime = audioBlob.type;
+        } else if (audioBase64.indexOf(",") > -1) {
+          const header = audioBase64.split(",")[0];
+          const m = header.match(/data:([^;]+)/);
+          if (m) audioMime = m[1];
+        }
+        if (audioMime.includes("mp3") || audioMime.includes("mpeg")) ext = "mp3";
+        else if (audioMime.includes("wav")) ext = "wav";
+        else if (audioMime.includes("m4a") || audioMime.includes("mp4") || audioMime.includes("aac")) ext = "m4a";
+        else if (audioMime.includes("ogg")) ext = "ogg";
+
+        const judulInput = document.getElementById("input-judul");
+        const judulRapat = (judulInput && judulInput.value.trim()) ? judulInput.value.trim() : "Rekaman_Rapat";
+        const audioFileName = `Rekaman_${sanitizeFilename(judulRapat)}_${Date.now()}.${ext}`;
+
+        const uploadAudioRes = await callGasApi({
+          action: "upload_audio",
+          base64Data: audioBase64,
+          fileName: audioFileName,
+          mimeType: audioMime
+        });
+
+        if (uploadAudioRes && uploadAudioRes.fileUrl) {
+          uploadedAudioDriveUrl = uploadAudioRes.fileUrl;
+          updateAudioDriveStatusUI("saved", uploadedAudioDriveUrl);
+          showToast("Berhasil! Berkas rekaman audio telah tersimpan permanen di folder Google Drive 'Rekaman_Audio'.", "success");
+        } else {
+          throw new Error((uploadAudioRes && uploadAudioRes.message) || "Gagal mengunggah berkas audio.");
+        }
+      } catch (err) {
+        console.error("Gagal mengunggah audio ke Drive:", err);
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        showToast("Gagal menyimpan audio ke Drive: " + err.message, "error");
+      }
+    }
+
+    function downloadCurrentAudioFile() {
+      if (!audioBlob) {
+        showToast("Belum ada rekaman audio untuk diunduh.", "info");
+        return;
+      }
+      const judulInput = document.getElementById("input-judul");
+      const judul = (judulInput && judulInput.value.trim()) ? judulInput.value.trim() : "Rekaman_Rapat";
+      const ext = (audioBlob.type && (audioBlob.type.includes("mp3") || audioBlob.type.includes("mpeg"))) ? "mp3" : "webm";
+      const filename = `Rekaman_${sanitizeFilename(judul)}_${Date.now()}.${ext}`;
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(audioBlob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast(`Berkas audio "${filename}" berhasil diunduh ke perangkat Anda.`, "success");
     }
 
     // ========================================================================
@@ -2767,7 +3111,9 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         }
 
         // 1. Unggah Audio jika ada (Audio baru yang direkam atau diunggah)
-        if (audioBase64) {
+        if (uploadedAudioDriveUrl) {
+          urlAudio = uploadedAudioDriveUrl;
+        } else if (audioBase64) {
           btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah Rekaman Audio...</span>';
           
           let audioMime = "audio/webm";
@@ -2795,6 +3141,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             });
             if (uploadAudioRes && uploadAudioRes.fileUrl) {
               urlAudio = uploadAudioRes.fileUrl;
+              uploadedAudioDriveUrl = uploadAudioRes.fileUrl;
+              updateAudioDriveStatusUI("saved", uploadedAudioDriveUrl);
             }
           } else {
             urlAudio = "mock://drive.google.com/audio-demo." + ext;
@@ -2907,6 +3255,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             showToast("Perubahan notulen berhasil disimpan secara lokal (Mode Demo).", "success");
           }
 
+          clearAudioDraftFromDB();
           cancelEditMode();
           switchTab("tab-list");
           fetchMeetingsFromAPI();
@@ -2955,6 +3304,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           showToast("Notulen disimpan secara lokal (Mode Demo).", "info");
         }
 
+        clearAudioDraftFromDB();
         // Reset form & kembali ke tab daftar
         resetFullForm();
         switchTab("tab-list");
