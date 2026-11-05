@@ -263,13 +263,6 @@
 
         <!-- Right Side: Status & Settings Button -->
         <div class="flex items-center space-x-2 sm:space-x-3">
-          <!-- Tombol Instal Aplikasi PWA di HP -->
-          <button id="btn-install-pwa" onclick="handlePwaInstallClick()" class="inline-flex items-center space-x-1.5 text-xs py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold shadow-md transition-all cursor-pointer transform hover:scale-105 active:scale-95" title="Pasang SI-NOTULEN di Layar Utama HP">
-            <i class="fa-solid fa-mobile-screen-button text-xs"></i>
-            <span class="hidden sm:inline">Instal di HP</span>
-            <span class="sm:hidden">Instal</span>
-          </button>
-
           <!-- Connection Status Pill -->
           <button id="connection-status-btn" onclick="openSettingsModal()" class="flex items-center space-x-2 text-xs py-1.5 px-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 transition-all text-white backdrop-blur-sm cursor-pointer" title="Klik untuk konfigurasi Web App URL">
             <span id="status-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -1600,26 +1593,6 @@
     </div>
   </div>
 
-  <!-- ================= FLOATING MOBILE INSTALL BANNER ================= -->
-  <div id="pwa-mobile-banner" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-40 bg-gradient-to-r from-navy-950 via-navy-900 to-navy-800 text-white p-3.5 rounded-2xl shadow-2xl border border-blue-400/30 flex items-center justify-between gap-3 animate-bounce-once">
-    <div class="flex items-center space-x-3 min-w-0">
-      <div class="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow">
-        <img src="logo-penajam.png" onerror="this.src='icon-192.png'" class="w-8 h-8 object-contain" alt="SI-NOTULEN">
-      </div>
-      <div class="truncate">
-        <p class="text-xs font-bold leading-tight">Instal SI-NOTULEN di HP</p>
-        <p class="text-[11px] text-blue-200 truncate">Akses cepat & tanpa instal Play Store</p>
-      </div>
-    </div>
-    <div class="flex items-center space-x-1.5 shrink-0">
-      <button onclick="handlePwaInstallClick()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs rounded-lg shadow transition">
-        Pasang
-      </button>
-      <button onclick="dismissPwaBanner()" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition" title="Tutup">
-        <i class="fa-solid fa-xmark text-sm"></i>
-      </button>
-    </div>
-  </div>
 
   <!-- ================= MODAL PANDUAN INSTAL DI HP ================= -->
   <div id="modal-install-guide" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
@@ -4801,20 +4774,12 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       e.preventDefault();
       deferredPwaPrompt = e;
       console.log('[PWA] Event beforeinstallprompt siap');
-
-      // Tampilkan banner mobile install jika belum pernah ditutup pada sesi ini
-      const banner = document.getElementById('pwa-mobile-banner');
-      if (banner && sessionStorage.getItem('si_notulen_pwa_dismissed') !== 'true') {
-        banner.classList.remove('hidden');
-      }
     });
 
     // 3. Tangkap event appinstalled ketika aplikasi sukses dipasang
     window.addEventListener('appinstalled', () => {
       console.log('[PWA] SI-NOTULEN sukses terpasang di HP!');
       deferredPwaPrompt = null;
-      const banner = document.getElementById('pwa-mobile-banner');
-      if (banner) banner.classList.add('hidden');
       showToast('Aplikasi SI-NOTULEN berhasil dipasang di Layar Utama HP Anda!', 'success');
     });
 
