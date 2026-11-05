@@ -1731,7 +1731,7 @@
     // 1. URL Backend Google Apps Script Web App (Terkoneksi ke Google Drive & Sheets)
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyIwHyGfax9VvYg-Ca9GZE43wJsLJSo2kCbtWeZPfBky-ttjwgGG7be9-F8qxGtUkJ5kA/exec"; 
     
-    // 2. Kunci Google Gemini AI API Key Permanen Default (Opsional)
+    // 2. Kunci Google Gemini AI API Key Permanen Default (Dapat diisi di menu Pengaturan)
     const DEFAULT_GEMINI_KEY = ""; 
 
     const STORAGE_KEY_GAS_URL = "si_notulen_gas_web_app_url";
@@ -1766,9 +1766,12 @@
       window.history.replaceState({ path: cleanUrl }, "", cleanUrl);
     }
 
-    let geminiApiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY) || DEFAULT_GEMINI_KEY || "";
-    if (!localStorage.getItem(STORAGE_KEY_GEMINI_KEY) && DEFAULT_GEMINI_KEY) {
-      localStorage.setItem(STORAGE_KEY_GEMINI_KEY, DEFAULT_GEMINI_KEY);
+    let geminiApiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+    if (!geminiApiKey || geminiApiKey.trim() === "" || geminiApiKey.includes("AIzaSyDummy") || geminiApiKey === "undefined") {
+      geminiApiKey = DEFAULT_GEMINI_KEY;
+      if (DEFAULT_GEMINI_KEY) {
+        localStorage.setItem(STORAGE_KEY_GEMINI_KEY, DEFAULT_GEMINI_KEY);
+      }
     }
 
     // Pastikan jika localStorage kosong atau bernilai lama, default ke DEFAULT_GAS_URL resmi
@@ -1900,16 +1903,22 @@
         });
         
         audioChunks = [];
-        const options = { mimeType: "audio/webm;codecs=opus" };
-        if (!MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-          // fallback jika browser tidak support opus
-          options.mimeType = "audio/webm";
-        }
+        // Bitrate audio dioptimalkan untuk vokal/percakapan rapat (28 kbps).
+        // Menghemat ukuran hingga ~75-80% (~3 MB per 15 menit), suara tetap jernih HD,
+        // dan proses upload ke Google Drive menjadi sangat cepat (< 5 detik).
+        const audioOptions = {
+          mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : "audio/webm",
+          audioBitsPerSecond: 28000
+        };
 
         try {
-          mediaRecorder = new MediaRecorder(stream, options);
+          mediaRecorder = new MediaRecorder(stream, audioOptions);
         } catch (e) {
-          mediaRecorder = new MediaRecorder(stream);
+          try {
+            mediaRecorder = new MediaRecorder(stream, { audioBitsPerSecond: 28000 });
+          } catch (e2) {
+            mediaRecorder = new MediaRecorder(stream);
+          }
         }
 
         mediaRecorder.ondataavailable = (event) => {
@@ -2406,6 +2415,21 @@
     }
 
     function downloadCurrentAudioFile() {
+      if (!audioBlob && audioBase64) {
+        try {
+          const parts = audioBase64.split(",");
+          const byteString = atob(parts[1] || parts[0]);
+          const mime = (parts[0].match(/data:([^;]+)/) || [])[1] || "audio/webm";
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          audioBlob = new Blob([ab], { type: mime });
+        } catch (e) {
+          console.warn("Gagal konversi Base64 ke Blob:", e);
+        }
+      }
       if (!audioBlob) {
         showToast("Belum ada rekaman audio untuk diunduh.", "info");
         return;
@@ -2504,9 +2528,11 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         };
 
         const candidateModels = [
-          "gemini-3.8-flash",
           "gemini-2.5-flash",
-          "gemini-1.5-flash"
+          "gemini-3.5-flash",
+          "gemini-flash-latest",
+          "gemini-3.8-flash",
+          "gemini-2.5-pro"
         ];
 
         let response = null;
@@ -2528,21 +2554,18 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
             if (res.ok) {
               response = res;
+              console.log(`Berhasil memproses rekaman dengan model Gemini: ${modelName}`);
               break;
             } else {
               const errData = await res.json().catch(() => ({}));
               lastErrorMsg = errData.error ? errData.error.message : `HTTP status ${res.status}`;
-              if (res.status === 404 || lastErrorMsg.includes("not found") || lastErrorMsg.includes("not supported")) {
-                console.warn(`Model ${modelName} tidak tersedia, mencoba model berikutnya...`);
-                continue;
-              } else {
-                throw new Error(lastErrorMsg);
-              }
+              console.warn(`Model ${modelName} gagal (${res.status}): ${lastErrorMsg}. Mencoba model alternatif...`);
+              continue;
             }
           } catch (fetchErr) {
-            if (fetchErr.message && !fetchErr.message.includes("not found")) {
-              throw fetchErr;
-            }
+            lastErrorMsg = fetchErr.message || String(fetchErr);
+            console.warn(`Fetch error pada model ${modelName}:`, fetchErr);
+            continue;
           }
         }
 
@@ -3104,6 +3127,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             });
             if (uploadUndRes && uploadUndRes.fileUrl) {
               urlUndangan = uploadUndRes.fileUrl;
+            } else {
+              throw new Error((uploadUndRes && uploadUndRes.message) || "Gagal mengunggah berkas undangan ke Google Drive.");
             }
           } else {
             urlUndangan = "mock://drive.google.com/undangan-demo.pdf";
@@ -3133,6 +3158,10 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           const audioFileName = `Rekaman_${sanitizeFilename(judulRapat)}_${Date.now()}.${ext}`;
           
           if (gasWebAppUrl) {
+            const sizeMb = audioBlob ? (audioBlob.size / (1024 * 1024)).toFixed(1) : "";
+            const sizeText = sizeMb ? ` (${sizeMb} MB)` : "";
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah Rekaman Audio${sizeText} ke Drive...</span>`;
+
             const uploadAudioRes = await callGasApi({
               action: "upload_audio",
               base64Data: audioBase64,
@@ -3143,6 +3172,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
               urlAudio = uploadAudioRes.fileUrl;
               uploadedAudioDriveUrl = uploadAudioRes.fileUrl;
               updateAudioDriveStatusUI("saved", uploadedAudioDriveUrl);
+            } else {
+              throw new Error((uploadAudioRes && uploadAudioRes.message) || "Gagal mengunggah berkas rekaman audio ke Google Drive. Rekaman suara Anda tetap aman di memori browser, silakan coba simpan kembali.");
             }
           } else {
             urlAudio = "mock://drive.google.com/audio-demo." + ext;
@@ -3163,6 +3194,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             });
             if (uploadDocRes && uploadDocRes.fileUrl) {
               urlLampiran = uploadDocRes.fileUrl;
+            } else {
+              throw new Error((uploadDocRes && uploadDocRes.message) || "Gagal mengunggah berkas lampiran ke Google Drive.");
             }
           } else {
             urlLampiran = "mock://drive.google.com/lampiran-demo.pdf";
