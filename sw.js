@@ -1,5 +1,5 @@
 // Service Worker untuk SI-NOTULEN PWA
-const CACHE_NAME = 'si-notulen-v1';
+const CACHE_NAME = 'si-notulen-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -15,7 +15,9 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map((url) => cache.add(url))
+      );
     }).then(() => self.skipWaiting())
   );
 });
