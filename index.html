@@ -2275,14 +2275,14 @@
       });
     }
 
-    async function saveLampiranFilesToDB(meetingId, files) {
+    async function saveLampiranFilesToDB(meetingId, files, undanganItem) {
       try {
-        if (!meetingId || !files || files.length === 0) return;
+        if (!meetingId) return;
         const db = await openNotulenDB();
         if (!db) return;
         const tx = db.transaction(NOTULEN_LAMPIRAN_STORE, "readwrite");
         const store = tx.objectStore(NOTULEN_LAMPIRAN_STORE);
-        const serialized = files.map(f => ({
+        const serialized = (files || []).map(f => ({
           id: f.id,
           name: f.name,
           size: f.size,
@@ -2292,9 +2292,24 @@
           isPdf: f.isPdf,
           existingUrl: f.existingUrl || ""
         }));
+        let serializedUndangan = null;
+        if (undanganItem && undanganItem.dataUrl) {
+          serializedUndangan = {
+            id: undanganItem.id || ("undangan_" + meetingId),
+            name: undanganItem.name || "Surat_Undangan.pdf",
+            size: undanganItem.size || 0,
+            type: undanganItem.type || "application/pdf",
+            dataUrl: undanganItem.dataUrl,
+            isImage: undanganItem.isImage || false,
+            isPdf: undanganItem.isPdf !== undefined ? undanganItem.isPdf : true,
+            isUndangan: true,
+            existingUrl: undanganItem.existingUrl || ""
+          };
+        }
         store.put({
           meetingId: meetingId,
           files: serialized,
+          undanganFile: serializedUndangan,
           updatedAt: new Date().toISOString()
         });
       } catch (err) {
@@ -2312,8 +2327,11 @@
           const store = tx.objectStore(NOTULEN_LAMPIRAN_STORE);
           const req = store.get(meetingId);
           req.onsuccess = () => {
-            if (req.result && req.result.files) {
-              resolve(req.result.files);
+            if (req.result) {
+              resolve({
+                files: req.result.files || [],
+                undanganFile: req.result.undanganFile || null
+              });
             } else {
               resolve(null);
             }
@@ -3566,8 +3584,26 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             showToast("Perubahan notulen berhasil disimpan secara lokal (Mode Demo).", "success");
           }
 
-          if (editingMeetingId && selectedFilesList.length > 0) {
-            await saveLampiranFilesToDB(editingMeetingId, selectedFilesList);
+          if (editingMeetingId) {
+            let currentUndanganObj = null;
+            if (selectedUndanganBase64) {
+              const uName = selectedUndanganFile ? selectedUndanganFile.name : "Surat_Undangan.pdf";
+              const isPdf = (selectedUndanganFile && selectedUndanganFile.name.toLowerCase().endsWith(".pdf")) || selectedUndanganBase64.includes("application/pdf");
+              const isImage = (selectedUndanganFile && selectedUndanganFile.type && selectedUndanganFile.type.startsWith("image/")) || selectedUndanganBase64.startsWith("data:image/");
+              currentUndanganObj = {
+                id: "undangan_" + editingMeetingId,
+                name: uName,
+                dataUrl: selectedUndanganBase64,
+                type: selectedUndanganFile ? selectedUndanganFile.type : (isPdf ? "application/pdf" : "image/jpeg"),
+                isPdf: isPdf,
+                isImage: isImage,
+                isUndangan: true,
+                existingUrl: urlUndangan || editingMeetingUndanganUrl || ""
+              };
+            }
+            if (selectedFilesList.length > 0 || currentUndanganObj) {
+              await saveLampiranFilesToDB(editingMeetingId, selectedFilesList, currentUndanganObj);
+            }
           }
 
           clearAudioDraftFromDB();
@@ -3623,8 +3659,26 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           showToast("Notulen disimpan secara lokal (Mode Demo).", "info");
         }
 
-        if (newSavedId && selectedFilesList.length > 0) {
-          await saveLampiranFilesToDB(newSavedId, selectedFilesList);
+        if (newSavedId) {
+          let currentUndanganObj = null;
+          if (selectedUndanganBase64) {
+            const uName = selectedUndanganFile ? selectedUndanganFile.name : "Surat_Undangan.pdf";
+            const isPdf = (selectedUndanganFile && selectedUndanganFile.name.toLowerCase().endsWith(".pdf")) || selectedUndanganBase64.includes("application/pdf");
+            const isImage = (selectedUndanganFile && selectedUndanganFile.type && selectedUndanganFile.type.startsWith("image/")) || selectedUndanganBase64.startsWith("data:image/");
+            currentUndanganObj = {
+              id: "undangan_" + newSavedId,
+              name: uName,
+              dataUrl: selectedUndanganBase64,
+              type: selectedUndanganFile ? selectedUndanganFile.type : (isPdf ? "application/pdf" : "image/jpeg"),
+              isPdf: isPdf,
+              isImage: isImage,
+              isUndangan: true,
+              existingUrl: urlUndangan || ""
+            };
+          }
+          if (selectedFilesList.length > 0 || currentUndanganObj) {
+            await saveLampiranFilesToDB(newSavedId, selectedFilesList, currentUndanganObj);
+          }
         }
 
         clearAudioDraftFromDB();
@@ -4130,25 +4184,70 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       const container = document.getElementById("print-lampiran-container");
       const lampiranBadge = document.getElementById("doc-lampiran-badge");
       const docBerkasText = document.getElementById("doc-berkas-text");
+      const docUndanganEl = document.getElementById("doc-undangan-text");
       if (!container) return;
       container.innerHTML = "";
 
-      // 1. Kumpulkan berkas lampiran yang tersedia
+      // 1. Kumpulkan berkas lampiran fisik/foto dan surat undangan
       let filesToRender = [];
+      let undanganToRender = null;
+
+      // Cek apakah ada di objek meeting langsung
       if (meeting.lampiranFiles && Array.isArray(meeting.lampiranFiles) && meeting.lampiranFiles.length > 0) {
-        filesToRender = meeting.lampiranFiles;
-      } else {
-        // Cek dari IndexedDB
-        const dbFiles = await getLampiranFilesFromDB(meeting.id);
-        if (dbFiles && dbFiles.length > 0) {
-          filesToRender = dbFiles;
-        } else if (selectedFilesList.length > 0 && (meeting.id === (editingMeetingId || "") || String(meeting.id).startsWith("DRAFT-"))) {
-          filesToRender = selectedFilesList;
+        filesToRender = [...meeting.lampiranFiles];
+      }
+      if (meeting.undanganFile) {
+        undanganToRender = meeting.undanganFile;
+      }
+
+      // Cek dari IndexedDB
+      const dbData = await getLampiranFilesFromDB(meeting.id);
+      if (dbData) {
+        if (dbData.files && dbData.files.length > 0 && filesToRender.length === 0) {
+          filesToRender = dbData.files;
+        }
+        if (dbData.undanganFile && !undanganToRender) {
+          undanganToRender = dbData.undanganFile;
         }
       }
 
-      // Jika berkas lokal tidak ada, gunakan URL Drive dari meeting.urlLampiran
-      if ((!filesToRender || filesToRender.length === 0) && meeting.urlLampiran && meeting.urlLampiran.trim() !== "") {
+      // Cek dari state form aktif jika sedang preview draft formulir saat ini
+      if (filesToRender.length === 0 && selectedFilesList.length > 0 && (meeting.id === (editingMeetingId || "") || String(meeting.id).startsWith("DRAFT-"))) {
+        filesToRender = [...selectedFilesList];
+      }
+      if (!undanganToRender && selectedUndanganBase64 && (meeting.id === (editingMeetingId || "") || String(meeting.id).startsWith("DRAFT-"))) {
+        const uName = selectedUndanganFile ? selectedUndanganFile.name : "Surat_Undangan.pdf";
+        const isPdf = (selectedUndanganFile && selectedUndanganFile.name.toLowerCase().endsWith(".pdf")) || selectedUndanganBase64.includes("application/pdf");
+        const isImage = (selectedUndanganFile && selectedUndanganFile.type && selectedUndanganFile.type.startsWith("image/")) || selectedUndanganBase64.startsWith("data:image/");
+        undanganToRender = {
+          id: "undangan_" + meeting.id,
+          name: uName,
+          dataUrl: selectedUndanganBase64,
+          type: selectedUndanganFile ? selectedUndanganFile.type : (isPdf ? "application/pdf" : "image/jpeg"),
+          isPdf: isPdf,
+          isImage: isImage,
+          isUndangan: true,
+          existingUrl: editingMeetingUndanganUrl || meeting.urlUndangan || ""
+        };
+      }
+
+      // Jika surat undangan belum ada dari data lokal tapi ada urlUndangan di Drive
+      if (!undanganToRender && meeting.urlUndangan && meeting.urlUndangan.trim() !== "") {
+        const uUrl = meeting.urlUndangan.trim();
+        undanganToRender = {
+          id: "undangan_drive_" + meeting.id,
+          name: "Surat Undangan Rapat",
+          url: uUrl,
+          existingUrl: uUrl,
+          isPdf: uUrl.toLowerCase().includes(".pdf"),
+          isImage: /\.(jpe?g|png|webp|gif)/i.test(uUrl) || !uUrl.toLowerCase().includes(".pdf"),
+          isUndangan: true,
+          isExisting: true
+        };
+      }
+
+      // Jika berkas lampiran lokal belum ada tapi ada urlLampiran di Drive
+      if (filesToRender.length === 0 && meeting.urlLampiran && meeting.urlLampiran.trim() !== "") {
         const urls = meeting.urlLampiran.split(/\r?\n|,\s*/).map(u => u.trim()).filter(Boolean);
         filesToRender = urls.map((u, idx) => ({
           id: "drive_" + idx,
@@ -4161,7 +4260,16 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         }));
       }
 
-      if (!filesToRender || filesToRender.length === 0) {
+      // Urutkan: Surat Undangan di posisi pertama, diikuti lampiran fisik / foto absensi
+      let allPrintAttachments = [];
+      if (undanganToRender) {
+        allPrintAttachments.push(undanganToRender);
+      }
+      if (filesToRender && filesToRender.length > 0) {
+        allPrintAttachments.push(...filesToRender);
+      }
+
+      if (allPrintAttachments.length === 0) {
         container.classList.add("hidden");
         if (docBerkasText) docBerkasText.innerText = "Tidak ada lampiran berkas.";
         if (lampiranBadge) lampiranBadge.classList.add("hidden");
@@ -4169,25 +4277,44 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       }
 
       container.classList.remove("hidden");
+      
+      // Update info text & badge di header
       if (lampiranBadge) {
-        lampiranBadge.innerText = `${filesToRender.length} Lampiran Berkas`;
+        if (undanganToRender && filesToRender.length > 0) {
+          lampiranBadge.innerText = `Termasuk Undangan & ${filesToRender.length} Lampiran Berkas`;
+        } else if (undanganToRender) {
+          lampiranBadge.innerText = `Termasuk Surat Undangan Resmi`;
+        } else {
+          lampiranBadge.innerText = `${filesToRender.length} Lampiran Berkas`;
+        }
         lampiranBadge.classList.remove("hidden");
       }
+
       if (docBerkasText) {
-        docBerkasText.innerText = `${filesToRender.length} berkas lampiran resmi terlampir pada dokumen ini.`;
+        if (undanganToRender && filesToRender.length > 0) {
+          docBerkasText.innerText = `Surat undangan dan ${filesToRender.length} berkas lampiran resmi terlampir pada dokumen ini.`;
+        } else if (undanganToRender) {
+          docBerkasText.innerText = `Surat undangan resmi disertakan sebagai lampiran pada dokumen ini.`;
+        } else {
+          docBerkasText.innerText = `${filesToRender.length} berkas lampiran resmi terlampir pada dokumen ini.`;
+        }
+      }
+      if (docUndanganEl && undanganToRender) {
+        docUndanganEl.innerText = "Surat undangan resmi disertakan sebagai lembar lampiran cetak dokumen ini.";
       }
 
       container.innerHTML = `
         <div id="lampiran-render-loading" class="text-center py-6 text-slate-500 avoid-break no-print">
           <i class="fa-solid fa-spinner animate-spin text-navy-800 text-xl mr-2"></i>
-          <span class="text-xs font-semibold">Menyiapkan ${filesToRender.length} berkas lampiran untuk cetak...</span>
+          <span class="text-xs font-semibold">Menyiapkan ${allPrintAttachments.length} berkas lampiran (termasuk Surat Undangan) untuk cetak...</span>
         </div>
       `;
 
       let renderedPagesHtml = [];
 
-      for (let i = 0; i < filesToRender.length; i++) {
-        const item = filesToRender[i];
+      for (let i = 0; i < allPrintAttachments.length; i++) {
+        const item = allPrintAttachments[i];
+        const isUndangan = !!item.isUndangan;
 
         // KASUS 1: File PDF (Render setiap halaman menggunakan PDF.js ke image tajam)
         if (item.isPdf && (item.dataUrl || item.base64)) {
@@ -4199,7 +4326,6 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
             for (let pageNum = 1; pageNum <= numPages; pageNum++) {
               const page = await pdfDoc.getPage(pageNum);
-              // Scale 1.5 memberikan kualitas cetak tajam tanpa beban memori berlebih
               const viewport = page.getViewport({ scale: 1.5 });
               const canvas = document.createElement("canvas");
               canvas.width = viewport.width;
@@ -4210,6 +4336,18 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
               canvas.width = 0;
               canvas.height = 0;
 
+              const badgeHtml = isUndangan 
+                ? '<span class="bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200">SURAT UNDANGAN RESMI</span>'
+                : '<span class="bg-red-50 text-red-800 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">BERKAS PDF</span>';
+
+              const titleText = isUndangan
+                ? `Berkas: ${escapeHtml(item.name)} (Surat Undangan Rapat${numPages > 1 ? ` - Halaman ${pageNum} dari ${numPages}` : ''})`
+                : `Dokumen: ${escapeHtml(item.name)} (Halaman ${pageNum} dari ${numPages})`;
+
+              const footerNote = isUndangan
+                ? `Surat Undangan Rapat Resmi &bull; Nomor: ${escapeHtml(meeting.id)} &bull; Dicetak via SI-NOTULEN Kecamatan Waru`
+                : `Lampiran Dokumen Resmi: ${escapeHtml(item.name)} &bull; Hal ${pageNum}/${numPages} &bull; Dicetak via SI-NOTULEN Kecamatan Waru`;
+
               renderedPagesHtml.push(`
                 <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
                   <!-- Header Resmi Halaman Lampiran -->
@@ -4219,8 +4357,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
                       <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
                     </div>
                     <div class="flex justify-between items-center text-[11px] text-slate-700 mt-1">
-                      <span class="font-semibold text-slate-900 truncate max-w-md">Dokumen: ${escapeHtml(item.name)} (Halaman ${pageNum} dari ${numPages})</span>
-                      <span class="bg-red-50 text-red-800 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">BERKAS PDF</span>
+                      <span class="font-semibold text-slate-900 truncate max-w-md">${titleText}</span>
+                      ${badgeHtml}
                     </div>
                   </div>
 
@@ -4231,13 +4369,17 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
                   <!-- Footer / Catatan Lampiran -->
                   <div class="text-center text-[11px] text-slate-500 italic mt-3 pb-2 avoid-break">
-                    Lampiran Dokumen Resmi: ${escapeHtml(item.name)} &bull; Hal ${pageNum}/${numPages} &bull; Dicetak via SI-NOTULEN Kecamatan Waru
+                    ${footerNote}
                   </div>
                 </div>
               `);
             }
           } catch (pdfErr) {
             console.error("Gagal merender PDF via pdfjs:", pdfErr);
+            const badgeHtml = isUndangan 
+              ? '<span class="bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200">SURAT UNDANGAN</span>'
+              : '<span class="bg-red-50 text-red-800 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">BERKAS PDF</span>';
+
             renderedPagesHtml.push(`
               <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
                 <div class="border-b-[2px] border-black pb-2 mb-4 avoid-break">
@@ -4245,12 +4387,15 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
                     <span>LAMPIRAN BERITA ACARA RAPAT</span>
                     <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
                   </div>
-                  <p class="text-[11px] text-slate-700 mt-1">Dokumen Lampiran: ${escapeHtml(item.name)}</p>
+                  <div class="flex justify-between items-center text-[11px] text-slate-700 mt-1">
+                    <span class="font-semibold text-slate-900">${isUndangan ? 'Surat Undangan Rapat: ' : 'Dokumen Lampiran: '}${escapeHtml(item.name)}</span>
+                    ${badgeHtml}
+                  </div>
                 </div>
                 <div class="p-8 bg-slate-50 border border-slate-300 rounded text-center my-4 avoid-break">
                   <i class="fa-solid fa-file-pdf text-red-600 text-4xl mb-2"></i>
                   <p class="text-sm font-bold text-slate-800">${escapeHtml(item.name)}</p>
-                  <p class="text-xs text-slate-500 mt-1">Berkas lampiran PDF resmi tersimpan di Google Drive.</p>
+                  <p class="text-xs text-slate-500 mt-1">Berkas resmi tersimpan di Google Drive.</p>
                   ${item.existingUrl ? `<a href="${item.existingUrl}" target="_blank" class="mt-2.5 inline-block text-xs text-blue-600 underline font-semibold">Buka Dokumen di Google Drive</a>` : ''}
                 </div>
               </div>
@@ -4260,6 +4405,18 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         // KASUS 2: File Foto / Gambar (JPG, JPEG, PNG, dsb)
         else if (item.isImage || (item.dataUrl && item.dataUrl.startsWith("data:image/"))) {
           const imgSrc = item.dataUrl || (item.existingUrl ? convertDriveUrlToDirectImage(item.existingUrl) : "");
+          const badgeHtml = isUndangan 
+            ? '<span class="bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200">SURAT UNDANGAN</span>'
+            : '<span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-300">FOTO DOKUMENTASI</span>';
+
+          const titleText = isUndangan
+            ? `Berkas: ${escapeHtml(item.name)} (Scan Surat Undangan Rapat)`
+            : `Dokumentasi: ${escapeHtml(item.name)}`;
+
+          const footerNote = isUndangan
+            ? `Scan Surat Undangan Rapat Resmi &bull; Nomor: ${escapeHtml(meeting.id)} &bull; Dicetak via SI-NOTULEN Kecamatan Waru`
+            : `Foto Dokumentasi Rapat: ${escapeHtml(item.name)} &bull; Dicetak via SI-NOTULEN Kecamatan Waru`;
+
           renderedPagesHtml.push(`
             <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
               <!-- Header Resmi Halaman Lampiran -->
@@ -4269,19 +4426,19 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
                   <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] text-slate-700 mt-1">
-                  <span class="font-semibold text-slate-900 truncate max-w-md">Dokumentasi: ${escapeHtml(item.name)}</span>
-                  <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-300">FOTO DOKUMENTASI</span>
+                  <span class="font-semibold text-slate-900 truncate max-w-md">${titleText}</span>
+                  ${badgeHtml}
                 </div>
               </div>
 
-              <!-- Foto Dokumentasi -->
+              <!-- Foto / Scan Gambar -->
               <div class="flex justify-center items-center py-2 bg-slate-50/50 print:bg-white rounded-lg avoid-break">
-                <img src="${imgSrc}" alt="${escapeHtml(item.name)}" class="max-w-full max-h-[80vh] w-auto h-auto object-contain border border-slate-300 shadow-sm print:shadow-none rounded" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'400\\' height=\\'250\\' viewBox=\\'0 0 400 250\\'><rect width=\\'400\\' height=\\'250\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%2364748b\\' font-family=\\'sans-serif\\' font-size=\\'13\\'>Foto Lampiran Tersimpan di Drive</text></svg>';" />
+                <img src="${imgSrc}" alt="${escapeHtml(item.name)}" class="max-w-full max-h-[80vh] w-auto h-auto object-contain border border-slate-300 shadow-sm print:shadow-none rounded" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'400\\' height=\\'250\\' viewBox=\\'0 0 400 250\\'><rect width=\\'400\\' height=\\'250\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%2364748b\\' font-family=\\'sans-serif\\' font-size=\\'13\\'>Berkas Lampiran Tersimpan di Drive</text></svg>';" />
               </div>
 
               <!-- Footer / Catatan Lampiran -->
               <div class="text-center text-[11px] text-slate-500 italic mt-3 pb-2 avoid-break">
-                Foto Dokumentasi Rapat: ${escapeHtml(item.name)} &bull; Dicetak via SI-NOTULEN Kecamatan Waru
+                ${footerNote}
               </div>
             </div>
           `);
@@ -4291,6 +4448,9 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           const driveLink = item.existingUrl || item.url || "#";
           const driveId = getGoogleDriveId(driveLink);
           const thumbnailSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200` : "";
+          const badgeHtml = isUndangan 
+            ? '<span class="bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200">SURAT UNDANGAN</span>'
+            : '<span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-200">BERKAS DIGITAL</span>';
 
           renderedPagesHtml.push(`
             <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
@@ -4300,8 +4460,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
                   <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] text-slate-700 mt-1">
-                  <span class="font-semibold text-slate-900">${escapeHtml(item.name)}</span>
-                  <span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-200">BERKAS DIGITAL</span>
+                  <span class="font-semibold text-slate-900">${isUndangan ? 'Surat Undangan: ' : ''}${escapeHtml(item.name)}</span>
+                  ${badgeHtml}
                 </div>
               </div>
 
@@ -4936,6 +5096,23 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
     }
 
     function getCurrentFormMeetingObject() {
+      let currentUndanganObj = null;
+      if (selectedUndanganBase64) {
+        const uName = selectedUndanganFile ? selectedUndanganFile.name : "Surat_Undangan.pdf";
+        const isPdf = (selectedUndanganFile && selectedUndanganFile.name.toLowerCase().endsWith(".pdf")) || selectedUndanganBase64.includes("application/pdf");
+        const isImage = (selectedUndanganFile && selectedUndanganFile.type && selectedUndanganFile.type.startsWith("image/")) || selectedUndanganBase64.startsWith("data:image/");
+        currentUndanganObj = {
+          id: "undangan_current",
+          name: uName,
+          dataUrl: selectedUndanganBase64,
+          type: selectedUndanganFile ? selectedUndanganFile.type : (isPdf ? "application/pdf" : "image/jpeg"),
+          isPdf: isPdf,
+          isImage: isImage,
+          isUndangan: true,
+          existingUrl: editingMeetingUndanganUrl || ""
+        };
+      }
+
       return {
         id: editingMeetingId || ("DRAFT-" + new Date().toISOString().slice(0, 10).replace(/-/g, "")),
         judulRapat: document.getElementById("input-judul").value || "Rapat Tatap Muka",
@@ -4950,7 +5127,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         urlAudio: editingMeetingAudioUrl || uploadedAudioDriveUrl || "",
         urlLampiran: editingMeetingLampiranUrl || "",
         urlUndangan: editingMeetingUndanganUrl || "",
-        lampiranFiles: selectedFilesList
+        lampiranFiles: selectedFilesList,
+        undanganFile: currentUndanganObj
       };
     }
 
