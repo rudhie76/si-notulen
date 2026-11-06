@@ -676,6 +676,24 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <!-- Nomor Berita Acara (Input Manual oleh Notulis) -->
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center justify-between">
+                <span>Nomor Berita Acara / Notulen <span class="text-red-500">*</span></span>
+                <span class="text-[11px] text-slate-400 font-normal normal-case">Dapat diketik manual oleh notulis (format resmi dinas)</span>
+              </label>
+              <div class="relative flex items-center">
+                <span class="absolute left-3.5 text-slate-400 text-sm font-mono pointer-events-none">
+                  <i class="fa-solid fa-hashtag text-xs"></i>
+                </span>
+                <input type="text" id="input-nomor" required placeholder="Contoh: 005/012/WARU/XI/2026 atau BA-20261106-001" class="w-full pl-9 pr-24 py-2.5 rounded-lg border border-slate-300 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-navy-800/30 focus:border-navy-800" oninput="handleNomorBeritaAcaraInput(this.value)">
+                <button type="button" onclick="generateDefaultNomor(true)" class="absolute right-1.5 px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-300 transition flex items-center space-x-1 cursor-pointer" title="Buat nomor otomatis jika tidak memiliki nomor khusus">
+                  <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-navy-700"></i>
+                  <span>Auto</span>
+                </button>
+              </div>
+            </div>
+
             <div class="md:col-span-2">
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                 Judul / Topik Rapat <span class="text-red-500">*</span>
@@ -1892,10 +1910,37 @@
     let editingMeetingUndanganUrl = "";
     let activeBeritaAcaraMeeting = null;
 
+    function generateDefaultNomor(force = false) {
+      const el = document.getElementById("input-nomor");
+      if (!el) return "";
+      if (!force && el.value && el.value.trim() !== "") {
+        return el.value.trim();
+      }
+      const now = new Date();
+      const datePart = now.toISOString().slice(0, 10).replace(/-/g, "");
+      const randPart = Math.floor(1000 + Math.random() * 9000);
+      const generated = `NOT-${datePart}-${randPart}`;
+      el.value = generated;
+      if (force) {
+        showToast("Nomor berita acara otomatis telah dibuat.", "info");
+      }
+      return generated;
+    }
+
+    function handleNomorBeritaAcaraInput(val) {
+      if (editingMeetingId) {
+        const badgeId = document.getElementById("edit-mode-badge-id");
+        if (badgeId) badgeId.innerText = val.trim() || editingMeetingId;
+      }
+    }
+
     // ========================================================================
     // INISIALISASI
     // ========================================================================
     document.addEventListener("DOMContentLoaded", () => {
+      // Inisialisasi input nomor default jika belum terisi
+      generateDefaultNomor(false);
+
       // Inisialisasi input tanggal default ke waktu sekarang
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -3013,6 +3058,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
     function parseIndonesianMeetingInvitation(rawText) {
       const text = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
       const result = {
+        nomor: "",
         judul: "",
         tanggalIso: "",
         tempat: "",
@@ -3020,6 +3066,15 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         peserta: "",
         agenda: ""
       };
+
+      // 0. Nomor Surat / Berita Acara
+      const nomorMatch = text.match(/(?:Nomor|No\.?)\s*[:=]\s*([^\n\r]+)/i);
+      if (nomorMatch && nomorMatch[1]) {
+        const rawNomor = nomorMatch[1].trim();
+        if (rawNomor.length > 2 && rawNomor.length < 80 && !/lampiran|sifat|hal|perihal/i.test(rawNomor)) {
+          result.nomor = rawNomor;
+        }
+      }
 
       // 1. Acara / Agenda Rapat terlebih dahulu
       const acaraMatch = text.match(/(?:Acara|Agenda)\s*[:=]\s*([^\n\r]+(?:\n\s*[-0-9•*\u2022\u25cf\u25cb][^\n\r]+)*)/i);
@@ -3154,6 +3209,13 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
     }
 
     function applyParsedDataToForm(parsed) {
+      if (parsed.nomor) {
+        const el = document.getElementById("input-nomor");
+        if (el) {
+          el.value = parsed.nomor;
+          highlightField(el);
+        }
+      }
       if (parsed.judul) {
         const el = document.getElementById("input-judul");
         el.value = parsed.judul;
@@ -3398,6 +3460,9 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         const d = new Date(rawDate);
         const formattedDate = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 
+        const rawNomorInput = (document.getElementById("input-nomor").value || "").trim();
+        const nomorBeritaAcara = rawNomorInput || (editingMeetingId || generateDefaultNomor(true));
+
         const judulRapat = document.getElementById("input-judul").value.trim();
         const tempat = document.getElementById("input-tempat").value.trim();
         const pimpinanRapat = document.getElementById("input-pimpinan").value.trim();
@@ -3524,8 +3589,9 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         if (editingMeetingId) {
           btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Memperbarui Notulen...</span>';
           
+          const finalId = nomorBeritaAcara || editingMeetingId;
           const updatePayload = {
-            id: editingMeetingId,
+            id: finalId,
             tanggal: formattedDate,
             judulRapat: judulRapat,
             pimpinanRapat: pimpinanRapat,
@@ -3551,7 +3617,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
               if (updateRes && updateRes.status === "success") {
                 updateSuccess = true;
-                showToast(`Notulen rapat ${editingMeetingId} berhasil diperbarui di Google Drive!`, "success");
+                showToast(`Notulen rapat ${finalId} berhasil diperbarui di Google Drive!`, "success");
               } else {
                 throw new Error((updateRes && updateRes.message) || "Gagal memperbarui notulen.");
               }
@@ -3571,12 +3637,12 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
                     action: "create",
                     data: {
                       ...updatePayload,
-                      id: editingMeetingId
+                      id: finalId
                     }
                   });
                   if (createRes && createRes.status === "success") {
                     updateSuccess = true;
-                    showToast(`Notulen rapat ${editingMeetingId} berhasil diperbarui di Google Drive!`, "success");
+                    showToast(`Notulen rapat ${finalId} berhasil diperbarui di Google Drive!`, "success");
                   } else {
                     throw new Error((createRes && createRes.message) || "Gagal menyimpan pembaruan notulen.");
                   }
@@ -3594,11 +3660,13 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             if (idx !== -1) {
               currentLocal[idx] = {
                 ...currentLocal[idx],
-                ...updatePayload
+                ...updatePayload,
+                id: finalId
               };
             } else {
               currentLocal.unshift({
                 ...updatePayload,
+                id: finalId,
                 waktuDibuat: new Date().toISOString()
               });
             }
@@ -3606,14 +3674,14 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             showToast("Perubahan notulen berhasil disimpan secara lokal (Mode Demo).", "success");
           }
 
-          if (editingMeetingId) {
+          if (finalId) {
             let currentUndanganObj = null;
             if (selectedUndanganBase64) {
               const uName = selectedUndanganFile ? selectedUndanganFile.name : "Surat_Undangan.pdf";
               const isPdf = (selectedUndanganFile && selectedUndanganFile.name.toLowerCase().endsWith(".pdf")) || selectedUndanganBase64.includes("application/pdf");
               const isImage = (selectedUndanganFile && selectedUndanganFile.type && selectedUndanganFile.type.startsWith("image/")) || selectedUndanganBase64.startsWith("data:image/");
               currentUndanganObj = {
-                id: "undangan_" + editingMeetingId,
+                id: "undangan_" + finalId,
                 name: uName,
                 dataUrl: selectedUndanganBase64,
                 type: selectedUndanganFile ? selectedUndanganFile.type : (isPdf ? "application/pdf" : "image/jpeg"),
@@ -3624,7 +3692,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
               };
             }
             if (selectedFilesList.length > 0 || currentUndanganObj) {
-              await saveLampiranFilesToDB(editingMeetingId, selectedFilesList, currentUndanganObj);
+              await saveLampiranFilesToDB(finalId, selectedFilesList, currentUndanganObj);
             }
           }
 
@@ -3638,6 +3706,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan ke Spreadsheet...</span>';
         
         const meetingPayload = {
+          id: nomorBeritaAcara,
           tanggal: formattedDate,
           judulRapat: judulRapat,
           pimpinanRapat: pimpinanRapat,
@@ -3652,7 +3721,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           tempat: tempat
         };
 
-        let newSavedId = "";
+        let newSavedId = nomorBeritaAcara;
         if (gasWebAppUrl) {
           const createRes = await callGasApi({
             action: "create",
@@ -3660,17 +3729,16 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           });
 
           if (createRes && createRes.status === "success") {
-            newSavedId = (createRes.data && createRes.data.id) || "";
+            newSavedId = (createRes.data && createRes.data.id) || nomorBeritaAcara;
             showToast("Notulen rapat dan berkas berhasil disimpan ke Google Drive!", "success");
           } else {
             throw new Error((createRes && createRes.message) || "Gagal menyimpan notulen.");
           }
         } else {
           // Simpan ke Demo LocalStorage
-          const demoId = "NOT-" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
-          newSavedId = demoId;
+          newSavedId = nomorBeritaAcara;
           const localItem = {
-            id: demoId,
+            id: nomorBeritaAcara,
             ...meetingPayload,
             lampiranFiles: selectedFilesList,
             waktuDibuat: new Date().toISOString()
@@ -3720,6 +3788,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
     function resetFullForm() {
       document.getElementById("form-notulen").reset();
+      generateDefaultNomor(true);
       resetAudioRecording();
       clearSelectedFile();
       clearUndanganFile();
@@ -5135,8 +5204,9 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         };
       }
 
+      const rawNomor = (document.getElementById("input-nomor")?.value || "").trim();
       return {
-        id: editingMeetingId || ("DRAFT-" + new Date().toISOString().slice(0, 10).replace(/-/g, "")),
+        id: rawNomor || editingMeetingId || ("DRAFT-" + new Date().toISOString().slice(0, 10).replace(/-/g, "")),
         judulRapat: document.getElementById("input-judul").value || "Rapat Tatap Muka",
         tanggal: document.getElementById("input-tanggal").value || new Date().toISOString().slice(0, 16),
         tempat: document.getElementById("input-tempat").value || "Ruang Rapat",
@@ -5346,6 +5416,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           }
         }
       }
+      document.getElementById("input-nomor").value = meeting.id || "";
       document.getElementById("input-judul").value = cleanJudul;
       document.getElementById("input-tanggal").value = parseTanggalToDatetimeInput(meeting.tanggal);
       document.getElementById("input-tempat").value = meeting.tempat || "";
@@ -5449,6 +5520,8 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
       const btnCancelEdit = document.getElementById("btn-cancel-edit-form");
       if (btnCancelEdit) btnCancelEdit.classList.add("hidden");
+
+      generateDefaultNomor(true);
     }
 
     function editFromModalBeritaAcara() {

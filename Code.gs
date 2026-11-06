@@ -446,9 +446,10 @@ function doPost(e) {
 
       // Ambil nilai lama agar kolom yang tidak diperbarui tidak terhapus
       const currentRow = sheet.getRange(rowIndexToUpdate, 1, 1, TABLE_HEADERS.length).getValues()[0];
+      const finalId = (meetingData && meetingData.id && meetingData.id.trim() !== "") ? meetingData.id.trim() : targetId;
 
       const updatedRow = [
-        targetId,
+        finalId,
         meetingData.tanggal !== undefined ? meetingData.tanggal : currentRow[1],
         meetingData.judulRapat !== undefined ? meetingData.judulRapat : currentRow[2],
         meetingData.pimpinanRapat !== undefined ? meetingData.pimpinanRapat : currentRow[3],
@@ -467,10 +468,10 @@ function doPost(e) {
 
       return createJsonResponse({
         status: "success",
-        message: "Data notulen dengan ID " + targetId + " berhasil diperbarui di database.",
-        id: targetId,
+        message: "Data notulen dengan ID " + finalId + " berhasil diperbarui di database.",
+        id: finalId,
         data: {
-          id: targetId,
+          id: finalId,
           tanggal: updatedRow[1],
           judulRapat: updatedRow[2],
           pimpinanRapat: updatedRow[3],
