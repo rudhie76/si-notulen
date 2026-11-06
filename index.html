@@ -233,6 +233,32 @@
         break-inside: avoid !important;
       }
 
+      /* Pemisah halaman lampiran cetak */
+      .print-page-break {
+        page-break-before: always !important;
+        break-before: page !important;
+      }
+
+      .lampiran-print-page {
+        page-break-before: always !important;
+        break-before: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        width: 100% !important;
+      }
+
+      .lampiran-print-page img {
+        display: block !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        max-width: 100% !important;
+        max-height: 850px !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+      }
+
       @page {
         size: A4 portrait;
         margin: 15mm 15mm 15mm 15mm;
@@ -982,6 +1008,10 @@
                 </div>
               </div>
               <div class="flex items-center space-x-2 flex-wrap gap-y-1.5">
+                <button type="button" onclick="openCurrentFormBeritaAcara()" class="px-3.5 py-2 rounded-lg bg-navy-800 hover:bg-navy-700 text-white font-bold text-xs flex items-center space-x-1.5 shadow transition cursor-pointer border border-white/20" title="Pratinjau & Cetak Berita Acara beserta berkas lampiran">
+                  <i class="fa-solid fa-print"></i>
+                  <span>Cetak Berita Acara</span>
+                </button>
                 <button type="button" onclick="openCurrentFormVisualNote()" class="px-3.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow transition cursor-pointer">
                   <i class="fa-solid fa-file-invoice"></i>
                   <span>Buka Visual Note 1 Halaman</span>
@@ -1013,49 +1043,64 @@
           </div>
 
           <!-- Card Berkas Lampiran Tersimpan (Mode Edit) -->
-          <div id="existing-lampiran-card" class="hidden bg-slate-100 border border-slate-300 rounded-xl p-3 sm:p-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg flex-shrink-0">
-                <i class="fa-solid fa-paperclip"></i>
-              </div>
-              <div>
-                <div class="flex items-center space-x-2">
-                  <p class="text-xs sm:text-sm font-bold text-slate-900">Berkas Lampiran / Foto Absensi Tersimpan di Drive</p>
-                  <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full border border-indigo-200">Tersimpan</span>
+          <div id="existing-lampiran-card" class="hidden bg-slate-100 border border-slate-300 rounded-xl p-3 sm:p-4 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg flex-shrink-0">
+                  <i class="fa-solid fa-paperclip"></i>
                 </div>
-                <p class="text-[11px] text-slate-500 mt-0.5">Lampiran dokumen lama akan tetap tersimpan kecuali Anda mengunggah berkas baru di bawah ini.</p>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <p class="text-xs sm:text-sm font-bold text-slate-900">Berkas Lampiran / Foto Absensi Tersimpan di Drive</p>
+                    <span id="existing-lampiran-badge" class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full border border-indigo-200">Tersimpan</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Lampiran dokumen lama akan tetap tersimpan kecuali Anda mengunggah berkas baru di bawah ini.</p>
+                </div>
               </div>
+              <a id="existing-lampiran-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-semibold flex items-center space-x-1 shadow transition">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                <span>Buka Lampiran</span>
+              </a>
             </div>
-            <a id="existing-lampiran-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-semibold flex items-center space-x-1 shadow transition">
-              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-              <span>Buka Lampiran</span>
-            </a>
+            <div id="existing-lampiran-links-list" class="flex flex-wrap gap-2 pt-1 border-t border-slate-200/80"></div>
           </div>
 
-          <!-- Drag & Drop Zone -->
+          <!-- Drag & Drop Zone (Mendukung Multi-File PDF & Foto) -->
           <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-navy-800 rounded-xl p-6 text-center transition cursor-pointer bg-slate-50/50 hover:bg-blue-50/20" onclick="document.getElementById('input-file').click()">
-            <input type="file" id="input-file" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx" onchange="handleFileSelected(event)">
+            <input type="file" id="input-file" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx" multiple onchange="handleFilesSelected(event)">
             <div class="w-12 h-12 bg-navy-50 text-navy-700 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
               <i class="fa-solid fa-cloud-arrow-up"></i>
             </div>
-            <p class="text-sm font-semibold text-slate-700">Klik untuk memilih berkas atau seret ke sini</p>
-            <p class="text-xs text-slate-400 mt-1">Mendukung file PDF, Word, Excel, JPG, PNG (Maksimal 15 MB disarankan)</p>
+            <p class="text-sm font-semibold text-slate-700">Klik untuk memilih berkas atau seret ke sini (Bisa pilih beberapa file sekaligus)</p>
+            <p class="text-xs text-slate-400 mt-1">Mendukung berkas PDF (daftar hadir/materi) & Foto JPG/PNG (dokumentasi). File akan otomatis digabung saat Berita Acara dicetak.</p>
           </div>
 
-          <!-- Selected File Card Preview -->
-          <div id="file-preview-card" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div id="file-icon" class="w-10 h-10 rounded-lg bg-navy-100 text-navy-800 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-file-pdf"></i>
+          <!-- Multi-File Selected Container -->
+          <div id="files-preview-container" class="hidden space-y-3">
+            <div class="flex items-center justify-between bg-slate-100 p-2.5 rounded-xl border border-slate-200">
+              <div class="flex items-center space-x-2">
+                <span id="files-count-badge" class="text-xs font-bold bg-navy-800 text-white px-2.5 py-0.5 rounded-full">0 Berkas Dipilih</span>
+                <span class="text-xs text-slate-500 hidden sm:inline">Siap dicetak bersama Berita Acara</span>
               </div>
-              <div>
-                <p id="file-name-label" class="text-xs sm:text-sm font-bold text-slate-800 truncate max-w-xs sm:max-w-md">nama_dokumen.pdf</p>
-                <p id="file-size-label" class="text-[11px] text-slate-500">0 KB</p>
+              <div class="flex items-center space-x-2">
+                <button type="button" onclick="document.getElementById('input-file').click()" class="text-xs bg-white hover:bg-slate-50 text-navy-800 border border-slate-300 font-semibold px-2.5 py-1 rounded-lg shadow-sm transition cursor-pointer">
+                  <i class="fa-solid fa-plus text-[10px] mr-1"></i> Tambah Berkas
+                </button>
+                <button type="button" onclick="clearAllSelectedFiles()" class="text-xs text-red-600 hover:text-red-700 font-semibold px-2 py-1 cursor-pointer">
+                  Hapus Semua
+                </button>
               </div>
             </div>
-            <button type="button" onclick="clearSelectedFile()" class="text-red-500 hover:text-red-700 p-2 text-sm" title="Hapus Berkas">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
+
+            <!-- List Card Berkas -->
+            <div id="files-preview-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-80 overflow-y-auto p-0.5">
+              <!-- Item akan dirender secara dinamis oleh JS -->
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start space-x-2.5 text-xs text-blue-900">
+              <i class="fa-solid fa-circle-check text-blue-600 text-sm mt-0.5 flex-shrink-0"></i>
+              <span><strong>Otomatis Terlampir pada Cetak Berita Acara:</strong> Setiap foto (JPG/PNG) dan halaman dokumen PDF yang Anda unggah akan otomatis tampil sebagai lampiran resmi dengan kop dan nomor berita acara yang sama saat dicetak atau diekspor ke PDF.</span>
+            </div>
           </div>
         </div>
 
@@ -1087,6 +1132,7 @@
         <div class="flex items-center space-x-2">
           <i class="fa-solid fa-print text-blue-300"></i>
           <h4 class="font-bold text-sm sm:text-base">Format Cetak Berita Acara Rapat</h4>
+          <span id="doc-lampiran-badge" class="hidden text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">Termasuk Lampiran</span>
         </div>
         <div class="flex items-center space-x-2">
           <button onclick="editFromModalBeritaAcara()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition cursor-pointer" title="Perbaiki data atau unggah berkas untuk Berita Acara ini">
@@ -1224,6 +1270,9 @@
               <p id="doc-sign-pimpinan" class="font-bold underline text-slate-900">(..........................................)</p>
             </div>
           </div>
+
+          <!-- LAMPIRAN BERKAS / FOTO DOKUMENTASI & ABSENSI (DICETAK BERSAMAAN) -->
+          <div id="print-lampiran-container" class="mt-8"></div>
 
         </div>
       </div>
@@ -1792,7 +1841,8 @@
     let recordSeconds = 0;
     let isRecordingPaused = false;
 
-    // State Lampiran Dokumen
+    // State Lampiran Dokumen (Mendukung Multi-File PDF & Foto untuk Cetak Berita Acara)
+    let selectedFilesList = [];
     let selectedFile = null;
     let selectedFileBase64 = null;
 
@@ -1840,6 +1890,33 @@
 
       // Periksa apakah ada rekaman audio darurat yang belum tersimpan
       checkAudioDraftOnStartup();
+
+      // Pasang listener drag & drop untuk unggah multi-berkas lampiran (PDF & Foto)
+      const dropZone = document.getElementById("drop-zone");
+      if (dropZone) {
+        ["dragenter", "dragover"].forEach(eventName => {
+          dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add("border-navy-800", "bg-blue-50/50");
+          }, false);
+        });
+
+        ["dragleave", "drop"].forEach(eventName => {
+          dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove("border-navy-800", "bg-blue-50/50");
+          }, false);
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+          const dt = e.dataTransfer;
+          if (dt && dt.files && dt.files.length > 0) {
+            handleFilesSelected({ target: { files: dt.files } });
+          }
+        }, false);
+      }
     });
 
     function updateConnectionStatusUI() {
@@ -2169,8 +2246,9 @@
     // MODUL PENYIMPANAN LANGSUNG AUDIO KE DRIVE & CADANGAN DARURAT (INDEXEDDB)
     // ========================================================================
     const NOTULEN_DB_NAME = "SiNotulenDB";
-    const NOTULEN_DB_VERSION = 1;
+    const NOTULEN_DB_VERSION = 2;
     const NOTULEN_AUDIO_STORE = "audio_drafts";
+    const NOTULEN_LAMPIRAN_STORE = "lampiran_files";
 
     function openNotulenDB() {
       return new Promise((resolve) => {
@@ -2185,6 +2263,9 @@
             if (!db.objectStoreNames.contains(NOTULEN_AUDIO_STORE)) {
               db.createObjectStore(NOTULEN_AUDIO_STORE, { keyPath: "id" });
             }
+            if (!db.objectStoreNames.contains(NOTULEN_LAMPIRAN_STORE)) {
+              db.createObjectStore(NOTULEN_LAMPIRAN_STORE, { keyPath: "meetingId" });
+            }
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => resolve(null);
@@ -2192,6 +2273,56 @@
           resolve(null);
         }
       });
+    }
+
+    async function saveLampiranFilesToDB(meetingId, files) {
+      try {
+        if (!meetingId || !files || files.length === 0) return;
+        const db = await openNotulenDB();
+        if (!db) return;
+        const tx = db.transaction(NOTULEN_LAMPIRAN_STORE, "readwrite");
+        const store = tx.objectStore(NOTULEN_LAMPIRAN_STORE);
+        const serialized = files.map(f => ({
+          id: f.id,
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          dataUrl: f.dataUrl,
+          isImage: f.isImage,
+          isPdf: f.isPdf,
+          existingUrl: f.existingUrl || ""
+        }));
+        store.put({
+          meetingId: meetingId,
+          files: serialized,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn("Gagal menyimpan lampiran ke IndexedDB:", err);
+      }
+    }
+
+    async function getLampiranFilesFromDB(meetingId) {
+      try {
+        if (!meetingId) return null;
+        const db = await openNotulenDB();
+        if (!db) return null;
+        return new Promise((resolve) => {
+          const tx = db.transaction(NOTULEN_LAMPIRAN_STORE, "readonly");
+          const store = tx.objectStore(NOTULEN_LAMPIRAN_STORE);
+          const req = store.get(meetingId);
+          req.onsuccess = () => {
+            if (req.result && req.result.files) {
+              resolve(req.result.files);
+            } else {
+              resolve(null);
+            }
+          };
+          req.onerror = () => resolve(null);
+        });
+      } catch (err) {
+        return null;
+      }
     }
 
     async function saveAudioDraftToDB(blob, durationSec, title) {
@@ -3042,42 +3173,173 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
     }
 
     // ========================================================================
-    // MODUL UNGGAH LAMPIRAN DOKUMEN / FOTO
+    // MODUL UNGGAH MULTI-LAMPIRAN DOKUMEN / FOTO ABSENSI
     // ========================================================================
-    function handleFileSelected(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+      });
+    }
 
-      selectedFile = file;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        selectedFileBase64 = reader.result;
-      };
+    function base64ToUint8Array(base64Data) {
+      let cleanBase64 = base64Data || "";
+      if (cleanBase64.includes(",")) {
+        cleanBase64 = cleanBase64.split(",")[1];
+      }
+      const binaryString = window.atob(cleanBase64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    }
 
-      // Tampilkan Card Preview
-      document.getElementById("file-name-label").innerText = file.name;
-      document.getElementById("file-size-label").innerText = (file.size / 1024).toFixed(1) + " KB";
-      
-      const iconEl = document.getElementById("file-icon");
-      if (file.type.includes("pdf")) {
-        iconEl.innerHTML = '<i class="fa-solid fa-file-pdf text-red-500"></i>';
-      } else if (file.type.includes("image")) {
-        iconEl.innerHTML = '<i class="fa-solid fa-file-image text-emerald-500"></i>';
-      } else if (file.type.includes("word") || file.type.includes("doc")) {
-        iconEl.innerHTML = '<i class="fa-solid fa-file-word text-blue-500"></i>';
-      } else {
-        iconEl.innerHTML = '<i class="fa-solid fa-file-lines text-slate-500"></i>';
+    async function handleFilesSelected(event) {
+      const files = (event && event.target && event.target.files) 
+        ? event.target.files 
+        : ((event && event.dataTransfer && event.dataTransfer.files) ? event.dataTransfer.files : []);
+      if (!files || files.length === 0) return;
+
+      await addFilesToList(files);
+
+      if (event && event.target && event.target.value !== undefined) {
+        try { event.target.value = ""; } catch (e) {}
+      }
+    }
+
+    async function addFilesToList(fileList) {
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        if (selectedFilesList.some(item => item.name === file.name && item.size === file.size)) {
+          continue;
+        }
+
+        try {
+          const dataUrl = await readFileAsDataUrl(file);
+          const isImage = (file.type && file.type.startsWith("image/")) || /\.(jpe?g|png|webp|bmp|gif)$/i.test(file.name);
+          const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+
+          const item = {
+            id: "file_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6),
+            file: file,
+            name: file.name,
+            size: file.size,
+            type: file.type || (isImage ? "image/jpeg" : (isPdf ? "application/pdf" : "application/octet-stream")),
+            dataUrl: dataUrl,
+            isImage: isImage,
+            isPdf: isPdf,
+            isExisting: false,
+            existingUrl: ""
+          };
+
+          selectedFilesList.push(item);
+        } catch (err) {
+          console.error("Gagal membaca file lampiran:", file.name, err);
+        }
       }
 
-      document.getElementById("file-preview-card").classList.remove("hidden");
+      if (selectedFilesList.length > 0) {
+        selectedFile = selectedFilesList[0].file;
+        selectedFileBase64 = selectedFilesList[0].dataUrl;
+      } else {
+        selectedFile = null;
+        selectedFileBase64 = null;
+      }
+
+      renderSelectedFilesUI();
+    }
+
+    function removeFileFromList(id) {
+      selectedFilesList = selectedFilesList.filter(item => item.id !== id);
+      if (selectedFilesList.length > 0) {
+        selectedFile = selectedFilesList[0].file;
+        selectedFileBase64 = selectedFilesList[0].dataUrl;
+      } else {
+        selectedFile = null;
+        selectedFileBase64 = null;
+      }
+      renderSelectedFilesUI();
+    }
+
+    function clearAllSelectedFiles() {
+      selectedFilesList = [];
+      selectedFile = null;
+      selectedFileBase64 = null;
+      const inputEl = document.getElementById("input-file");
+      if (inputEl) inputEl.value = "";
+      renderSelectedFilesUI();
     }
 
     function clearSelectedFile() {
-      selectedFile = null;
-      selectedFileBase64 = null;
-      document.getElementById("input-file").value = "";
-      document.getElementById("file-preview-card").classList.add("hidden");
+      clearAllSelectedFiles();
+    }
+
+    function renderSelectedFilesUI() {
+      const container = document.getElementById("files-preview-container");
+      const listEl = document.getElementById("files-preview-list");
+      const badge = document.getElementById("files-count-badge");
+
+      if (!container || !listEl) return;
+
+      if (selectedFilesList.length === 0) {
+        container.classList.add("hidden");
+        listEl.innerHTML = "";
+        return;
+      }
+
+      container.classList.remove("hidden");
+      const imgCount = selectedFilesList.filter(f => f.isImage).length;
+      const pdfCount = selectedFilesList.filter(f => f.isPdf).length;
+      const otherCount = selectedFilesList.length - imgCount - pdfCount;
+
+      let parts = [];
+      if (imgCount > 0) parts.push(`${imgCount} Foto`);
+      if (pdfCount > 0) parts.push(`${pdfCount} PDF`);
+      if (otherCount > 0) parts.push(`${otherCount} Berkas`);
+
+      if (badge) {
+        badge.innerText = `${selectedFilesList.length} Berkas Dipilih (${parts.join(", ")})`;
+      }
+
+      listEl.innerHTML = selectedFilesList.map(item => {
+        let iconOrThumb = "";
+        if (item.isImage && item.dataUrl) {
+          iconOrThumb = `<img src="${item.dataUrl}" alt="${escapeHtml(item.name)}" class="w-11 h-11 object-cover rounded-lg border border-slate-200 flex-shrink-0" />`;
+        } else if (item.isPdf) {
+          iconOrThumb = `<div class="w-11 h-11 rounded-lg bg-red-100 text-red-600 flex flex-col items-center justify-center font-bold flex-shrink-0"><i class="fa-solid fa-file-pdf text-base"></i><span class="text-[8px] uppercase tracking-tighter leading-none mt-0.5">PDF</span></div>`;
+        } else {
+          iconOrThumb = `<div class="w-11 h-11 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-lg flex-shrink-0"><i class="fa-solid fa-file-lines"></i></div>`;
+        }
+
+        const sizeStr = item.size ? (item.size > 1024 * 1024 ? (item.size / (1024 * 1024)).toFixed(1) + " MB" : (item.size / 1024).toFixed(0) + " KB") : "";
+        const typeBadge = item.isImage 
+          ? '<span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">Lampiran Cetak (Foto)</span>'
+          : (item.isPdf 
+              ? '<span class="text-[9px] bg-red-100 text-red-800 font-bold px-1.5 py-0.5 rounded">Lampiran Cetak (PDF)</span>'
+              : '<span class="text-[9px] bg-slate-100 text-slate-700 font-medium px-1.5 py-0.5 rounded">Dokumen Drive</span>');
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-between shadow-sm hover:border-slate-300 transition">
+            <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+              ${iconOrThumb}
+              <div class="min-w-0 flex-1 pr-1">
+                <p class="text-xs font-bold text-slate-800 truncate" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</p>
+                <div class="flex items-center space-x-1.5 mt-0.5">
+                  ${typeBadge}
+                  ${sizeStr ? `<span class="text-[10px] text-slate-400 font-medium">${sizeStr}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <button type="button" onclick="removeFileFromList('${item.id}')" class="text-slate-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition flex-shrink-0" title="Hapus Berkas Ini">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+      }).join("");
     }
 
     // ========================================================================
@@ -3176,26 +3438,46 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           }
         }
 
-        // 2. Unggah Dokumen jika ada (Lampiran baru yang dipilih)
-        if (selectedFileBase64 && selectedFile) {
-          btnSubmit.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah Lampiran Dokumen...</span>';
-          const docFileName = `Lampiran_${sanitizeFilename(selectedFile.name)}`;
-          
-          if (gasWebAppUrl) {
-            const uploadDocRes = await callGasApi({
-              action: "upload_file",
-              base64Data: selectedFileBase64,
-              fileName: docFileName,
-              mimeType: selectedFile.type || "application/octet-stream"
-            });
-            if (uploadDocRes && uploadDocRes.fileUrl) {
-              urlLampiran = uploadDocRes.fileUrl;
+        // 2. Unggah Dokumen / Multi-Lampiran ke Google Drive jika ada
+        let uploadedDocUrls = [];
+        if (editingMeetingId && editingMeetingLampiranUrl) {
+          const prevUrls = editingMeetingLampiranUrl.split(/\r?\n|,\s*/).map(u => u.trim()).filter(Boolean);
+          uploadedDocUrls.push(...prevUrls);
+        }
+
+        const filesToUpload = selectedFilesList.filter(f => !f.isExisting && f.dataUrl);
+        if (filesToUpload.length > 0) {
+          for (let i = 0; i < filesToUpload.length; i++) {
+            const fItem = filesToUpload[i];
+            const sizeMb = fItem.size ? ` (${(fItem.size / (1024 * 1024)).toFixed(1)} MB)` : "";
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-1.5"></i><span>Mengunggah Lampiran (${i + 1}/${filesToUpload.length}: ${escapeHtml(fItem.name.substring(0, 16))}${sizeMb})...</span>`;
+            
+            const docFileName = `Lampiran_${i + 1}_${sanitizeFilename(fItem.name)}`;
+            if (gasWebAppUrl) {
+              const uploadDocRes = await callGasApi({
+                action: "upload_file",
+                base64Data: fItem.dataUrl,
+                fileName: docFileName,
+                mimeType: fItem.type || "application/octet-stream"
+              });
+              if (uploadDocRes && uploadDocRes.fileUrl) {
+                uploadedDocUrls.push(uploadDocRes.fileUrl);
+                fItem.existingUrl = uploadDocRes.fileUrl;
+                fItem.isExisting = true;
+              } else {
+                throw new Error((uploadDocRes && uploadDocRes.message) || `Gagal mengunggah berkas ${fItem.name} ke Google Drive.`);
+              }
             } else {
-              throw new Error((uploadDocRes && uploadDocRes.message) || "Gagal mengunggah berkas lampiran ke Google Drive.");
+              const mockUrl = `mock://drive.google.com/lampiran_${i + 1}_${sanitizeFilename(fItem.name)}`;
+              uploadedDocUrls.push(mockUrl);
+              fItem.existingUrl = mockUrl;
+              fItem.isExisting = true;
             }
-          } else {
-            urlLampiran = "mock://drive.google.com/lampiran-demo.pdf";
           }
+        }
+
+        if (uploadedDocUrls.length > 0) {
+          urlLampiran = uploadedDocUrls.join("\n");
         }
 
         // 3. Simpan baris notulen ke Google Sheets (UPDATE atau CREATE)
@@ -3284,6 +3566,10 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
             showToast("Perubahan notulen berhasil disimpan secara lokal (Mode Demo).", "success");
           }
 
+          if (editingMeetingId && selectedFilesList.length > 0) {
+            await saveLampiranFilesToDB(editingMeetingId, selectedFilesList);
+          }
+
           clearAudioDraftFromDB();
           cancelEditMode();
           switchTab("tab-list");
@@ -3308,6 +3594,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           tempat: tempat
         };
 
+        let newSavedId = "";
         if (gasWebAppUrl) {
           const createRes = await callGasApi({
             action: "create",
@@ -3315,6 +3602,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
           });
 
           if (createRes && createRes.status === "success") {
+            newSavedId = (createRes.data && createRes.data.id) || "";
             showToast("Notulen rapat dan berkas berhasil disimpan ke Google Drive!", "success");
           } else {
             throw new Error((createRes && createRes.message) || "Gagal menyimpan notulen.");
@@ -3322,15 +3610,21 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         } else {
           // Simpan ke Demo LocalStorage
           const demoId = "NOT-" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
+          newSavedId = demoId;
           const localItem = {
             id: demoId,
             ...meetingPayload,
+            lampiranFiles: selectedFilesList,
             waktuDibuat: new Date().toISOString()
           };
           const currentLocal = getLocalMeetings();
           currentLocal.unshift(localItem);
           saveLocalMeetings(currentLocal);
           showToast("Notulen disimpan secara lokal (Mode Demo).", "info");
+        }
+
+        if (newSavedId && selectedFilesList.length > 0) {
+          await saveLampiranFilesToDB(newSavedId, selectedFilesList);
         }
 
         clearAudioDraftFromDB();
@@ -3505,7 +3799,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
                 ${hasLampiran ? `
                   <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200" title="Ada lampiran berkas">
                     <i class="fa-solid fa-paperclip text-[9px]"></i>
-                    <span>Lampiran</span>
+                    <span>${meeting.urlLampiran.split(/\r?\n|,\s*/).filter(Boolean).length > 1 ? `${meeting.urlLampiran.split(/\r?\n|,\s*/).filter(Boolean).length} Lampiran` : 'Lampiran'}</span>
                   </span>
                 ` : ''}
               </div>
@@ -3584,9 +3878,9 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
               ` : ''}
 
               ${hasLampiran ? `
-                <a href="${meeting.urlLampiran}" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-semibold flex items-center space-x-1.5 border border-blue-200 transition">
+                <a href="${meeting.urlLampiran.split(/\r?\n|,\s*/)[0]}" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-semibold flex items-center space-x-1.5 border border-blue-200 transition" title="Buka berkas lampiran di Google Drive">
                   <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-blue-600"></i>
-                  <span>Lihat Lampiran</span>
+                  <span>${meeting.urlLampiran.split(/\r?\n|,\s*/).filter(Boolean).length > 1 ? `${meeting.urlLampiran.split(/\r?\n|,\s*/).filter(Boolean).length} Lampiran` : 'Lihat Lampiran'}</span>
                 </a>
               ` : ''}
             </div>
@@ -3754,9 +4048,23 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
     }
 
     // ========================================================================
-    // MODAL FORMAT CETAK BERITA ACARA FORMAL
+    // MODAL FORMAT CETAK BERITA ACARA FORMAL & MULTI-LAMPIRAN
     // ========================================================================
-    function openModalBeritaAcara(meeting) {
+    function getGoogleDriveId(url) {
+      if (!url) return "";
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+      return match ? match[1] : "";
+    }
+
+    function convertDriveUrlToDirectImage(url) {
+      const id = getGoogleDriveId(url);
+      if (id) {
+        return `https://lh3.googleusercontent.com/d/${id}`;
+      }
+      return url;
+    }
+
+    async function openModalBeritaAcara(meeting) {
       activeBeritaAcaraMeeting = meeting;
       document.getElementById("doc-id").innerText = meeting.id;
       document.getElementById("doc-hari-tanggal").innerText = formatIndoFullDate(meeting.tanggal);
@@ -3806,9 +4114,218 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         docUndanganEl.innerText = hasUndangan ? "Surat undangan resmi tersimpan di Drive (folder Surat_Undangan)." : "Tidak ada berkas undangan.";
       }
       document.getElementById("doc-audio-text").innerText = hasAudio ? "Tautan rekaman suara tersimpan di Google Drive." : "Tidak ada rekaman audio.";
-      document.getElementById("doc-berkas-text").innerText = hasDoc ? "Berkas lampiran fisik/foto tersimpan di Google Drive." : "Tidak ada lampiran berkas.";
+      
+      const lampiranBadge = document.getElementById("doc-lampiran-badge");
+      if (lampiranBadge) {
+        lampiranBadge.classList.add("hidden");
+      }
 
       document.getElementById("modal-berita-acara").classList.remove("hidden");
+
+      // Render berkas lampiran (PDF per halaman & Foto) agar muncul bersamaan di cetak Berita Acara
+      await renderPrintLampiran(meeting);
+    }
+
+    async function renderPrintLampiran(meeting) {
+      const container = document.getElementById("print-lampiran-container");
+      const lampiranBadge = document.getElementById("doc-lampiran-badge");
+      const docBerkasText = document.getElementById("doc-berkas-text");
+      if (!container) return;
+      container.innerHTML = "";
+
+      // 1. Kumpulkan berkas lampiran yang tersedia
+      let filesToRender = [];
+      if (meeting.lampiranFiles && Array.isArray(meeting.lampiranFiles) && meeting.lampiranFiles.length > 0) {
+        filesToRender = meeting.lampiranFiles;
+      } else {
+        // Cek dari IndexedDB
+        const dbFiles = await getLampiranFilesFromDB(meeting.id);
+        if (dbFiles && dbFiles.length > 0) {
+          filesToRender = dbFiles;
+        } else if (selectedFilesList.length > 0 && (meeting.id === (editingMeetingId || "") || String(meeting.id).startsWith("DRAFT-"))) {
+          filesToRender = selectedFilesList;
+        }
+      }
+
+      // Jika berkas lokal tidak ada, gunakan URL Drive dari meeting.urlLampiran
+      if ((!filesToRender || filesToRender.length === 0) && meeting.urlLampiran && meeting.urlLampiran.trim() !== "") {
+        const urls = meeting.urlLampiran.split(/\r?\n|,\s*/).map(u => u.trim()).filter(Boolean);
+        filesToRender = urls.map((u, idx) => ({
+          id: "drive_" + idx,
+          name: `Lampiran Dokumen ${idx + 1}`,
+          url: u,
+          existingUrl: u,
+          isImage: /\.(jpe?g|png|webp|gif)/i.test(u) || !u.toLowerCase().includes(".pdf"),
+          isPdf: u.toLowerCase().includes(".pdf"),
+          isExisting: true
+        }));
+      }
+
+      if (!filesToRender || filesToRender.length === 0) {
+        container.classList.add("hidden");
+        if (docBerkasText) docBerkasText.innerText = "Tidak ada lampiran berkas.";
+        if (lampiranBadge) lampiranBadge.classList.add("hidden");
+        return;
+      }
+
+      container.classList.remove("hidden");
+      if (lampiranBadge) {
+        lampiranBadge.innerText = `${filesToRender.length} Lampiran Berkas`;
+        lampiranBadge.classList.remove("hidden");
+      }
+      if (docBerkasText) {
+        docBerkasText.innerText = `${filesToRender.length} berkas lampiran resmi terlampir pada dokumen ini.`;
+      }
+
+      container.innerHTML = `
+        <div id="lampiran-render-loading" class="text-center py-6 text-slate-500 avoid-break no-print">
+          <i class="fa-solid fa-spinner animate-spin text-navy-800 text-xl mr-2"></i>
+          <span class="text-xs font-semibold">Menyiapkan ${filesToRender.length} berkas lampiran untuk cetak...</span>
+        </div>
+      `;
+
+      let renderedPagesHtml = [];
+
+      for (let i = 0; i < filesToRender.length; i++) {
+        const item = filesToRender[i];
+
+        // KASUS 1: File PDF (Render setiap halaman menggunakan PDF.js ke image tajam)
+        if (item.isPdf && (item.dataUrl || item.base64)) {
+          const rawBase64 = item.dataUrl || item.base64;
+          try {
+            const pdfBytes = base64ToUint8Array(rawBase64);
+            const pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+            const numPages = pdfDoc.numPages;
+
+            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+              const page = await pdfDoc.getPage(pageNum);
+              // Scale 1.5 memberikan kualitas cetak tajam tanpa beban memori berlebih
+              const viewport = page.getViewport({ scale: 1.5 });
+              const canvas = document.createElement("canvas");
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              const ctx = canvas.getContext("2d");
+              await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+              const imgDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+              canvas.width = 0;
+              canvas.height = 0;
+
+              renderedPagesHtml.push(`
+                <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
+                  <!-- Header Resmi Halaman Lampiran -->
+                  <div class="border-b-[2px] border-black pb-2 mb-4 avoid-break">
+                    <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-black">
+                      <span>LAMPIRAN BERITA ACARA RAPAT</span>
+                      <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] text-slate-700 mt-1">
+                      <span class="font-semibold text-slate-900 truncate max-w-md">Dokumen: ${escapeHtml(item.name)} (Halaman ${pageNum} dari ${numPages})</span>
+                      <span class="bg-red-50 text-red-800 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">BERKAS PDF</span>
+                    </div>
+                  </div>
+
+                  <!-- Konten Halaman PDF yang Dirender -->
+                  <div class="flex justify-center items-center py-2 bg-slate-50/50 print:bg-white rounded-lg avoid-break">
+                    <img src="${imgDataUrl}" alt="${escapeHtml(item.name)} - Hal ${pageNum}" class="max-w-full max-h-[82vh] w-auto h-auto object-contain border border-slate-300 shadow-sm print:shadow-none" />
+                  </div>
+
+                  <!-- Footer / Catatan Lampiran -->
+                  <div class="text-center text-[11px] text-slate-500 italic mt-3 pb-2 avoid-break">
+                    Lampiran Dokumen Resmi: ${escapeHtml(item.name)} &bull; Hal ${pageNum}/${numPages} &bull; Dicetak via SI-NOTULEN Kecamatan Waru
+                  </div>
+                </div>
+              `);
+            }
+          } catch (pdfErr) {
+            console.error("Gagal merender PDF via pdfjs:", pdfErr);
+            renderedPagesHtml.push(`
+              <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
+                <div class="border-b-[2px] border-black pb-2 mb-4 avoid-break">
+                  <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-black">
+                    <span>LAMPIRAN BERITA ACARA RAPAT</span>
+                    <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
+                  </div>
+                  <p class="text-[11px] text-slate-700 mt-1">Dokumen Lampiran: ${escapeHtml(item.name)}</p>
+                </div>
+                <div class="p-8 bg-slate-50 border border-slate-300 rounded text-center my-4 avoid-break">
+                  <i class="fa-solid fa-file-pdf text-red-600 text-4xl mb-2"></i>
+                  <p class="text-sm font-bold text-slate-800">${escapeHtml(item.name)}</p>
+                  <p class="text-xs text-slate-500 mt-1">Berkas lampiran PDF resmi tersimpan di Google Drive.</p>
+                  ${item.existingUrl ? `<a href="${item.existingUrl}" target="_blank" class="mt-2.5 inline-block text-xs text-blue-600 underline font-semibold">Buka Dokumen di Google Drive</a>` : ''}
+                </div>
+              </div>
+            `);
+          }
+        } 
+        // KASUS 2: File Foto / Gambar (JPG, JPEG, PNG, dsb)
+        else if (item.isImage || (item.dataUrl && item.dataUrl.startsWith("data:image/"))) {
+          const imgSrc = item.dataUrl || (item.existingUrl ? convertDriveUrlToDirectImage(item.existingUrl) : "");
+          renderedPagesHtml.push(`
+            <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
+              <!-- Header Resmi Halaman Lampiran -->
+              <div class="border-b-[2px] border-black pb-2 mb-4 avoid-break">
+                <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-black">
+                  <span>LAMPIRAN BERITA ACARA RAPAT</span>
+                  <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-slate-700 mt-1">
+                  <span class="font-semibold text-slate-900 truncate max-w-md">Dokumentasi: ${escapeHtml(item.name)}</span>
+                  <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-300">FOTO DOKUMENTASI</span>
+                </div>
+              </div>
+
+              <!-- Foto Dokumentasi -->
+              <div class="flex justify-center items-center py-2 bg-slate-50/50 print:bg-white rounded-lg avoid-break">
+                <img src="${imgSrc}" alt="${escapeHtml(item.name)}" class="max-w-full max-h-[80vh] w-auto h-auto object-contain border border-slate-300 shadow-sm print:shadow-none rounded" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'400\\' height=\\'250\\' viewBox=\\'0 0 400 250\\'><rect width=\\'400\\' height=\\'250\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%2364748b\\' font-family=\\'sans-serif\\' font-size=\\'13\\'>Foto Lampiran Tersimpan di Drive</text></svg>';" />
+              </div>
+
+              <!-- Footer / Catatan Lampiran -->
+              <div class="text-center text-[11px] text-slate-500 italic mt-3 pb-2 avoid-break">
+                Foto Dokumentasi Rapat: ${escapeHtml(item.name)} &bull; Dicetak via SI-NOTULEN Kecamatan Waru
+              </div>
+            </div>
+          `);
+        }
+        // KASUS 3: Berkas Dokumen Lain / Tautan Drive Umum
+        else {
+          const driveLink = item.existingUrl || item.url || "#";
+          const driveId = getGoogleDriveId(driveLink);
+          const thumbnailSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200` : "";
+
+          renderedPagesHtml.push(`
+            <div class="lampiran-print-page print-page-break pt-6 mt-8 border-t-2 border-dashed border-slate-300 print:border-none print:mt-0 print:pt-0">
+              <div class="border-b-[2px] border-black pb-2 mb-4 avoid-break">
+                <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-black">
+                  <span>LAMPIRAN BERITA ACARA RAPAT</span>
+                  <span class="font-mono">NOMOR: ${escapeHtml(meeting.id)}</span>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-slate-700 mt-1">
+                  <span class="font-semibold text-slate-900">${escapeHtml(item.name)}</span>
+                  <span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-200">BERKAS DIGITAL</span>
+                </div>
+              </div>
+
+              ${thumbnailSrc ? `
+                <div class="flex justify-center items-center py-2 bg-slate-50/50 print:bg-white rounded-lg avoid-break">
+                  <img src="${thumbnailSrc}" alt="${escapeHtml(item.name)}" class="max-w-full max-h-[78vh] w-auto h-auto object-contain border border-slate-300 shadow-sm print:shadow-none rounded" onerror="this.style.display='none'" />
+                </div>
+              ` : `
+                <div class="p-8 bg-slate-50 border border-slate-300 rounded text-center my-6 avoid-break">
+                  <i class="fa-solid fa-paperclip text-navy-800 text-3xl mb-2"></i>
+                  <p class="text-xs font-bold text-slate-800">${escapeHtml(item.name)}</p>
+                  <p class="text-[11px] text-slate-500 mt-1">Tautan Berkas: ${escapeHtml(driveLink)}</p>
+                </div>
+              `}
+
+              <div class="text-center text-[11px] text-slate-500 italic mt-3 pb-2 avoid-break">
+                Dokumentasi Berkas Lampiran &bull; Tersimpan di Google Drive &bull; SI-NOTULEN Kecamatan Waru
+              </div>
+            </div>
+          `);
+        }
+      }
+
+      container.innerHTML = renderedPagesHtml.join("");
     }
 
     function closeModalBeritaAcara() {
@@ -4359,7 +4876,17 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       if (meeting.urlAudio || meeting.urlLampiran || meeting.urlUndangan) {
         waText += `📁 *ARSIP DIGITAL TERPADU:*\n`;
         if (meeting.urlAudio) waText += `🎙️ Rekaman Audio Meja: ${meeting.urlAudio}\n`;
-        if (meeting.urlLampiran) waText += `📎 Berkas/Foto Absensi: ${meeting.urlLampiran}\n`;
+        if (meeting.urlLampiran) {
+          const lUrls = meeting.urlLampiran.split(/\r?\n|,\s*/).map(u => u.trim()).filter(Boolean);
+          if (lUrls.length > 1) {
+            waText += `📎 Berkas/Foto Lampiran (${lUrls.length} file):\n`;
+            lUrls.forEach((u, i) => {
+              waText += `   • Lampiran ${i + 1}: ${u}\n`;
+            });
+          } else {
+            waText += `📎 Berkas/Foto Absensi: ${meeting.urlLampiran}\n`;
+          }
+        }
         if (meeting.urlUndangan) waText += `📩 Berkas Undangan: ${meeting.urlUndangan}\n`;
         waText += `\n`;
       }
@@ -4410,7 +4937,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
 
     function getCurrentFormMeetingObject() {
       return {
-        id: "DRAFT-" + new Date().toISOString().slice(0, 10).replace(/-/g, ""),
+        id: editingMeetingId || ("DRAFT-" + new Date().toISOString().slice(0, 10).replace(/-/g, "")),
         judulRapat: document.getElementById("input-judul").value || "Rapat Tatap Muka",
         tanggal: document.getElementById("input-tanggal").value || new Date().toISOString().slice(0, 16),
         tempat: document.getElementById("input-tempat").value || "Ruang Rapat",
@@ -4420,10 +4947,16 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         agenda: document.getElementById("input-agenda").value || "-",
         hasilKesepakatan: document.getElementById("input-hasil").value || "Belum ada hasil kesepakatan.",
         tindakLanjut: document.getElementById("input-tindaklanjut").value || "Belum ada tindak lanjut.",
-        urlAudio: "",
-        urlLampiran: "",
-        urlUndangan: ""
+        urlAudio: editingMeetingAudioUrl || uploadedAudioDriveUrl || "",
+        urlLampiran: editingMeetingLampiranUrl || "",
+        urlUndangan: editingMeetingUndanganUrl || "",
+        lampiranFiles: selectedFilesList
       };
+    }
+
+    function openCurrentFormBeritaAcara() {
+      const meeting = getCurrentFormMeetingObject();
+      openModalBeritaAcara(meeting);
     }
 
     function openCurrentFormVisualNote() {
@@ -4576,8 +5109,7 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
       editingMeetingUndanganUrl = meeting.urlUndangan || "";
 
       // Reset file input baru
-      selectedFile = null;
-      selectedFileBase64 = null;
+      clearAllSelectedFiles();
       selectedUndanganFile = null;
       selectedUndanganBase64 = null;
       audioBlob = null;
@@ -4644,20 +5176,32 @@ Hasilkan respons HANYA berupa JSON valid murni (tanpa tanda kutip tiga \`\`\`jso
         if (existingAudioCard) existingAudioCard.classList.add("hidden");
       }
 
-      // Sembunyikan preview baru audio dan preview baru berkas
+      // Sembunyikan preview baru audio dan reset preview berkas
       document.getElementById("audio-preview-container").classList.add("hidden");
       document.getElementById("audio-player").src = "";
-      document.getElementById("file-preview-card").classList.add("hidden");
       document.getElementById("undangan-detected-card").classList.add("hidden");
 
       // 3. Tampilkan Lampiran Tersimpan jika ada
       const existingLampiranCard = document.getElementById("existing-lampiran-card");
       const existingLampiranLink = document.getElementById("existing-lampiran-link");
+      const existingLampiranBadge = document.getElementById("existing-lampiran-badge");
+      const existingLampiranList = document.getElementById("existing-lampiran-links-list");
       if (editingMeetingLampiranUrl && editingMeetingLampiranUrl.trim() !== "") {
         if (existingLampiranCard) existingLampiranCard.classList.remove("hidden");
-        if (existingLampiranLink) existingLampiranLink.href = editingMeetingLampiranUrl;
+        const urls = editingMeetingLampiranUrl.split(/\r?\n|,\s*/).map(u => u.trim()).filter(Boolean);
+        if (existingLampiranLink) existingLampiranLink.href = urls[0] || "#";
+        if (existingLampiranBadge) existingLampiranBadge.innerText = `${urls.length} Berkas Tersimpan`;
+        if (existingLampiranList) {
+          existingLampiranList.innerHTML = urls.map((u, idx) => `
+            <a href="${u}" target="_blank" class="px-2.5 py-1 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+              <span>Lampiran ${idx + 1}</span>
+            </a>
+          `).join("");
+        }
       } else {
         if (existingLampiranCard) existingLampiranCard.classList.add("hidden");
+        if (existingLampiranList) existingLampiranList.innerHTML = "";
       }
 
       // Perbarui Tombol Submit Form
