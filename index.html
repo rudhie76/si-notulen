@@ -1168,22 +1168,22 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       
       <!-- Modal Header Toolbar -->
-      <div class="bg-navy-900 text-white px-5 py-3.5 flex items-center justify-between no-print">
-        <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-print text-blue-300"></i>
-          <h4 class="font-bold text-sm sm:text-base">Format Cetak Berita Acara Rapat</h4>
-          <span id="doc-lampiran-badge" class="hidden text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">Termasuk Lampiran</span>
+      <div class="bg-navy-900 text-white px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-2.5 no-print flex-shrink-0">
+        <div class="flex items-center flex-wrap gap-2 min-w-0">
+          <i class="fa-solid fa-print text-blue-300 flex-shrink-0"></i>
+          <h4 class="font-bold text-sm sm:text-base whitespace-nowrap">Format Cetak Berita Acara Rapat</h4>
+          <span id="doc-lampiran-badge" class="hidden text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-400/30 whitespace-nowrap flex-shrink-0">Termasuk Lampiran</span>
         </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="editFromModalBeritaAcara()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition cursor-pointer" title="Perbaiki data atau unggah berkas untuk Berita Acara ini">
+        <div class="flex items-center flex-wrap gap-2 ml-auto flex-shrink-0">
+          <button onclick="editFromModalBeritaAcara()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition cursor-pointer whitespace-nowrap flex-shrink-0" title="Perbaiki data atau unggah berkas untuk Berita Acara ini">
             <i class="fa-solid fa-pen-to-square"></i>
             <span>Edit Rapat</span>
           </button>
-          <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition">
+          <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition whitespace-nowrap flex-shrink-0">
             <i class="fa-solid fa-print"></i>
             <span>Cetak / Ekspor PDF</span>
           </button>
-          <button onclick="closeModalBeritaAcara()" class="text-white/70 hover:text-white p-1.5 text-lg">
+          <button onclick="closeModalBeritaAcara()" class="text-white/70 hover:text-white p-1.5 text-lg cursor-pointer flex-shrink-0" title="Tutup Preview">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -1548,39 +1548,39 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       
       <!-- Modal Header Toolbar -->
-      <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-navy-900 text-white px-5 py-3.5 flex items-center justify-between no-print border-b border-white/10">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-purple-500/30 text-amber-300 flex items-center justify-center">
+      <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-navy-900 text-white px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-2.5 no-print border-b border-white/10 flex-shrink-0">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/30 text-amber-300 flex items-center justify-center flex-shrink-0">
             <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
           </div>
-          <div>
-            <h4 class="font-bold text-sm sm:text-base text-white">Visual Note 1 Halaman (One-Pager Summary)</h4>
-            <p class="text-[11px] text-purple-200/80">Ringkasan eksekutif padat hasil rapat tatap muka</p>
+          <div class="min-w-0">
+            <h4 class="font-bold text-sm sm:text-base text-white whitespace-nowrap">Visual Note 1 Halaman (One-Pager Summary)</h4>
+            <p class="text-[11px] text-purple-200/80 truncate">Ringkasan eksekutif padat hasil rapat tatap muka</p>
           </div>
         </div>
 
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center flex-wrap gap-2 ml-auto flex-shrink-0">
           <!-- Edit Rapat -->
-          <button type="button" onclick="editFromModalVisualNote()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition cursor-pointer" title="Perbaiki data atau unggah berkas untuk rapat ini">
+          <button type="button" onclick="editFromModalVisualNote()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition cursor-pointer whitespace-nowrap flex-shrink-0" title="Perbaiki data atau unggah berkas untuk rapat ini">
             <i class="fa-solid fa-pen-to-square"></i>
-            <span class="hidden sm:inline">Edit Rapat</span>
+            <span class="inline">Edit Rapat</span>
           </button>
           <!-- WhatsApp Share -->
-          <button type="button" onclick="shareActiveVisualNoteWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition" title="Bagikan Ringkasan ke WhatsApp">
+          <button type="button" onclick="shareActiveVisualNoteWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition whitespace-nowrap flex-shrink-0" title="Bagikan Ringkasan ke WhatsApp">
             <i class="fa-brands fa-whatsapp text-sm"></i>
-            <span class="hidden sm:inline">Kirim ke WhatsApp</span>
+            <span class="inline">Kirim ke WhatsApp</span>
           </button>
           <!-- Copy WhatsApp -->
-          <button type="button" onclick="copyActiveVisualNoteWhatsApp()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-white/15 transition" title="Salin Format Teks WhatsApp">
+          <button type="button" onclick="copyActiveVisualNoteWhatsApp()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-white/15 transition flex-shrink-0 cursor-pointer" title="Salin Format Teks WhatsApp">
             <i class="fa-solid fa-copy"></i>
           </button>
           <!-- Print One-Pager -->
-          <button type="button" onclick="printVisualNote()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition" title="Cetak Ringkasan 1 Halaman">
+          <button type="button" onclick="printVisualNote()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow transition whitespace-nowrap flex-shrink-0 cursor-pointer" title="Cetak Ringkasan 1 Halaman">
             <i class="fa-solid fa-print"></i>
-            <span class="hidden sm:inline">Cetak 1 Halaman</span>
+            <span class="inline">Cetak 1 Halaman</span>
           </button>
           <!-- Close -->
-          <button type="button" onclick="closeModalVisualNote()" class="text-white/70 hover:text-white p-1.5 text-lg">
+          <button type="button" onclick="closeModalVisualNote()" class="text-white/70 hover:text-white p-1.5 text-lg cursor-pointer flex-shrink-0" title="Tutup Modal">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
